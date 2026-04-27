@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Parkour Dash</title>
+    <title>Parkour Dash & Boss Fight</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap');
 
@@ -44,21 +44,73 @@
             z-index: 10;
         }
 
-        #score-container {
+        #hud {
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 900;
             color: #333;
             text-shadow: 2px 2px 0px #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coin-icon {
+            width: 25px;
+            height: 25px;
+            background: gold;
+            border-radius: 50%;
+            border: 3px solid #b8860b;
+            box-shadow: 2px 2px 0px #fff;
+        }
+
+        /* Boss HP Bar */
+        #boss-hp-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 30px;
+            background: #333;
+            border: 4px solid #fff;
+            border-radius: 15px;
+            display: none; /* Sembunyi sampai bos muncul */
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        #boss-hp-bar {
+            width: 100%;
+            height: 100%;
+            background: #FF0044;
+            transition: width 0.2s ease;
+        }
+
+        #boss-name {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 22px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
         }
 
         #message-box {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 15px;
-            border: 3px solid #333;
+            border: 4px solid #333;
             box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
             text-align: center;
             pointer-events: auto;
@@ -138,7 +190,7 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7);
             border: 3px solid #333;
             color: #333;
             font-size: 24px;
@@ -157,7 +209,7 @@
         }
 
         .btn-action {
-            background: rgba(255, 87, 34, 0.8);
+            background: rgba(255, 87, 34, 0.9);
             color: #fff;
         }
 
@@ -172,8 +224,14 @@
 </head>
 <body>
 
-    <div id="score-container">
-        Skor: <span id="score">0</span>
+    <div id="hud">
+        <div class="hud-item">Jarak: <span id="score">0</span>m</div>
+        <div class="hud-item"><div class="coin-icon"></div> <span id="coin-score">0</span></div>
+    </div>
+
+    <div id="boss-hp-container">
+        <div id="boss-hp-bar"></div>
+        <div id="boss-name">BOSS: MATA ROBOT</div>
     </div>
 
     <div id="ui-layer">
@@ -181,8 +239,8 @@
             <h1 id="game-title">Parkour Dash</h1>
             <p id="game-desc" class="controls-info">
                 PC: <span>WASD / Panah</span> untuk gerak, <span>Spasi</span> Lompat, <span>Shift</span> Dash.<br>
-                Gunakan tembok untuk meluncur dan lompat!<br><br>
-                Berlari sejauh mungkin tanpa jatuh.
+                Tips: <span>DASH</span> menembus bos untuk memberikan Damage!<br><br>
+                Kumpulkan koin dan bertahan hidup sejauh mungkin.
             </p>
             <button id="start-btn">Mulai Game</button>
         </div>
@@ -205,20 +263,22 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
+        const coinScoreElement = document.getElementById('coin-score');
         const uiLayer = document.getElementById('ui-layer');
         const messageBox = document.getElementById('message-box');
         const startBtn = document.getElementById('start-btn');
         const gameTitle = document.getElementById('game-title');
         const gameDesc = document.getElementById('game-desc');
         const mobileControls = document.getElementById('mobile-controls');
+        
+        const bossHpContainer = document.getElementById('boss-hp-container');
+        const bossHpBar = document.getElementById('boss-hp-bar');
 
-        // Deteksi layar sentuh
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (isTouchDevice) {
             mobileControls.style.display = 'flex';
         }
 
-        // Ukuran Canvas dinamis
         let width, height;
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -227,14 +287,15 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Variabel Game
-        let gameState = 'START'; // START, PLAYING, GAMEOVER
+        // --- GLOBAL VARIABLES ---
+        let gameState = 'START'; 
         let score = 0;
+        let coinsCollected = 0;
         let distanceScrolled = 0;
         let camera = { x: 0, y: 0, shake: 0 };
         let lastTime = 0;
+        let globalTime = 0;
         
-        // Input Manager
         const keys = { right: false, left: false, jump: false, dash: false };
         let jumpJustPressed = false;
         let dashJustPressed = false;
@@ -260,7 +321,6 @@
             if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.dash = false;
         });
 
-        // Kontrol Mobile
         function bindTouchBtn(id, keyName, isAction) {
             const btn = document.getElementById(id);
             btn.addEventListener('touchstart', (e) => {
@@ -279,250 +339,56 @@
         bindTouchBtn('btn-jump', 'jump', 'jump');
         bindTouchBtn('btn-dash', 'dash', 'dash');
 
-
-        // --- ENTITAS ---
-
-        class Player {
-            constructor() {
-                this.w = 30;
-                this.h = 40;
-                this.reset();
-            }
-
-            reset() {
-                this.x = 100;
-                this.y = 100;
-                this.vx = 0;
-                this.vy = 0;
-                this.speed = 450; 
-                this.jumpForce = -750;
-                this.gravity = 2000;
-                this.friction = 0.80; // Lebih responsif
-                
-                this.isGrounded = false;
-                this.jumpsLeft = 2;
-                this.wallSliding = false;
-                this.wallDirection = 0; 
-                
-                this.isDashing = false;
-                this.dashTime = 0;
-                this.dashDuration = 0.15; // Lebih singkat & snappy
-                this.dashSpeed = 1400;
-                this.dashCooldown = 0;
-                this.canDash = true;
-
-                // Gameplay Assists
-                this.coyoteTime = 0;
-                this.jumpBuffer = 0;
-
-                this.color = '#FF5722'; // Warna orange cerah
+        // --- ENTITAS KECIL (Koin & Partikel) ---
+        class Coin {
+            constructor(x, y) {
+                this.x = x;
+                this.baseY = y;
+                this.y = y;
+                this.w = 20;
+                this.h = 20;
+                this.collected = false;
+                this.timeOffset = Math.random() * Math.PI * 2;
             }
 
             update(dt) {
-                // Cooldowns & Timers
-                if (this.dashCooldown > 0) this.dashCooldown -= dt;
-                if (this.coyoteTime > 0) this.coyoteTime -= dt;
-                if (this.jumpBuffer > 0) this.jumpBuffer -= dt;
-
-                if (this.isGrounded) {
-                    this.coyoteTime = 0.1; // 100ms toleransi lompat setelah jatuh
-                }
+                // Animasi mengambang
+                this.y = this.baseY + Math.sin(globalTime * 3 + this.timeOffset) * 10;
                 
-                if (jumpJustPressed) {
-                    this.jumpBuffer = 0.15; // 150ms toleransi pencet lompat sebelum mendarat
-                }
-
-                // Dash Logic
-                if (dashJustPressed && this.canDash && this.dashCooldown <= 0) {
-                    this.isDashing = true;
-                    this.dashTime = this.dashDuration;
-                    this.canDash = false; 
-                    this.vy = 0; 
-                    this.vx = keys.left ? -this.dashSpeed : this.dashSpeed; 
-                    if (!keys.left && !keys.right) this.vx = this.dashSpeed; 
+                // Cek tabrakan dengan player
+                if (!this.collected && player.checkCollision(this)) {
+                    this.collected = true;
+                    coinsCollected++;
+                    coinScoreElement.innerText = coinsCollected;
+                    createParticles(this.x + 10, this.y + 10, 8, 'gold', 3);
                     
-                    createParticles(this.x + this.w/2, this.y + this.h/2, 15, this.color, 5);
-                    camera.shake = 5;
-                }
-
-                if (this.isDashing) {
-                    this.dashTime -= dt;
-                    if (this.dashTime <= 0) {
-                        this.isDashing = false;
-                        this.dashCooldown = 0.4;
-                        this.vx *= 0.4; 
-                    }
-                    if (Math.random() > 0.5) {
-                        particles.push(new Particle(this.x + this.w/2, this.y + this.h/2 + (Math.random()*20-10), 0, 0, '#ddd', 0.2));
-                    }
-                } else {
-                    // Normal Horizontal Movement
-                    let moveDir = 0;
-                    if (keys.right) moveDir += 1;
-                    if (keys.left) moveDir -= 1;
-
-                    // Akselerasi lebih cepat
-                    if (moveDir !== 0) {
-                        this.vx += moveDir * this.speed * 8 * dt;
-                    } else {
-                        // Friksi lebih kuat (berhenti lebih cepat)
-                        this.vx *= Math.pow(this.friction, dt * 60);
-                    }
-
-                    if (Math.abs(this.vx) > this.speed) {
-                        this.vx = Math.sign(this.vx) * this.speed;
-                    }
-
-                    // Gravitasi & Wall Slide
-                    if (this.wallSliding && this.vy > 0) {
-                        this.vy = 150; // Slide lebih natural
-                        if (Math.random() > 0.8) {
-                            createParticles(this.wallDirection > 0 ? this.x + this.w : this.x, this.y + this.h, 1, '#ccc', 2);
-                        }
-                    } else {
-                        this.vy += this.gravity * dt;
-                    }
-                    if (this.vy > 1200) this.vy = 1200; 
-                }
-
-                let nextX = this.x + this.vx * dt;
-                let nextY = this.y + this.vy * dt;
-
-                this.isGrounded = false;
-                this.wallSliding = false;
-                this.wallDirection = 0;
-
-                // Tabrakan Axis X
-                this.x = nextX;
-                for (let plat of platforms) {
-                    if (this.checkCollision(plat)) {
-                        if (this.vx > 0) { 
-                            this.x = plat.x - this.w;
-                            this.wallDirection = 1;
-                        } else if (this.vx < 0) { 
-                            this.x = plat.x + plat.w;
-                            this.wallDirection = -1;
-                        }
-                        this.vx = 0;
-                        if (!this.isGrounded && this.vy > 0) {
-                            this.wallSliding = true;
-                        }
-                    }
-                }
-
-                // Tabrakan Axis Y
-                this.y += this.vy * dt;
-                for (let plat of platforms) {
-                    if (this.checkCollision(plat)) {
-                        if (this.vy > 0) { 
-                            if (this.vy > 900) {
-                                camera.shake = 8;
-                                createParticles(this.x + this.w/2, this.y + this.h, 10, '#bbb', 3);
-                            }
-                            this.y = plat.y - this.h;
-                            this.isGrounded = true;
-                            this.jumpsLeft = 2; 
-                            this.canDash = true; 
-                        } else if (this.vy < 0) { 
-                            this.y = plat.y + plat.h;
-                        }
-                        this.vy = 0;
-                    }
-                }
-
-                // Jump Logic with Buffer & Coyote Time
-                if (this.jumpBuffer > 0) {
-                    if (this.wallSliding) {
-                        // Wall Jump
-                        this.vy = this.jumpForce * 0.9;
-                        this.vx = this.wallDirection * -this.speed * 1.2; 
-                        this.wallSliding = false;
-                        this.isDashing = false;
-                        this.jumpBuffer = 0;
-                        createParticles(this.wallDirection > 0 ? this.x + this.w : this.x, this.y + this.h/2, 10, '#ddd', 4);
-                    } else if (this.coyoteTime > 0) {
-                        // Normal Jump
-                        this.vy = this.jumpForce;
-                        this.coyoteTime = 0;
-                        this.jumpBuffer = 0;
-                        this.jumpsLeft--;
-                        createParticles(this.x + this.w/2, this.y + this.h, 10, '#ddd', 3);
-                    } else if (this.jumpsLeft > 0 && !this.isGrounded) {
-                        // Double Jump
-                        this.vy = this.jumpForce * 0.85;
-                        this.jumpsLeft--;
-                        this.jumpBuffer = 0;
-                        this.isDashing = false; 
-                        createParticles(this.x + this.w/2, this.y + this.h, 15, '#FF5722', 4);
-                    }
-                }
-
-                // Batas Kematian (Jatuh)
-                if (this.y > camera.y + height + 200) {
-                    gameOver();
+                    // Sedikit lompat skor
+                    coinScoreElement.style.transform = "scale(1.5)";
+                    setTimeout(() => coinScoreElement.style.transform = "scale(1)", 100);
                 }
             }
 
             draw() {
+                if (this.collected) return;
                 ctx.save();
-                ctx.fillStyle = this.color;
+                ctx.translate(this.x + 10, this.y + 10);
+                // Efek koin berputar 3D sederhana
+                ctx.scale(Math.cos(globalTime * 4 + this.timeOffset), 1);
                 
-                // Efek stretch saat melompat/jatuh atau dash
-                let squashX = this.w;
-                let squashY = this.h;
-
-                if (this.isDashing) {
-                    squashX = this.w + 20;
-                    squashY = this.h - 15;
-                } else if (!this.isGrounded) {
-                    // Tarik sedikit secara vertikal jika bergerak cepat ke atas/bawah
-                    let stretch = Math.min(Math.abs(this.vy) / 100, 10);
-                    squashY = this.h + stretch;
-                    squashX = this.w - stretch/2;
-                }
-
-                // Pusatkan gambar relatif terhadap x,y (yang berada di pojok kiri atas)
-                let drawX = this.x + (this.w - squashX) / 2;
-                let drawY = this.y + (this.h - squashY); // Jangkar di bawah
-
-                ctx.fillRect(drawX, drawY, squashX, squashY);
-
-                // Mata karakter (Arah hadap)
-                ctx.fillStyle = '#fff';
-                let eyeOffsetX = keys.left ? 5 : (keys.right ? 15 : 10);
-                ctx.fillRect(drawX + eyeOffsetX, drawY + 10, 5, 5);
-                ctx.fillRect(drawX + eyeOffsetX + 8, drawY + 10, 5, 5);
-
-                ctx.restore();
-            }
-
-            checkCollision(rect) {
-                return this.x < rect.x + rect.w &&
-                       this.x + this.w > rect.x &&
-                       this.y < rect.y + rect.h &&
-                       this.y + this.h > rect.y;
-            }
-        }
-
-        class Platform {
-            constructor(x, y, w, h) {
-                this.x = x;
-                this.y = y;
-                this.w = w;
-                this.h = h;
-            }
-
-            draw() {
-                ctx.save();
+                ctx.beginPath();
+                ctx.arc(0, 0, 10, 0, Math.PI * 2);
+                ctx.fillStyle = 'gold';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#b8860b';
+                ctx.stroke();
                 
-                // Tema platform bersih (Beton/Rumput)
-                ctx.fillStyle = '#455A64'; // Abu-abu gelap untuk badan
-                ctx.fillRect(this.x, this.y, this.w, this.h);
+                // Garis tengah koin
+                ctx.beginPath();
+                ctx.moveTo(0, -6);
+                ctx.lineTo(0, 6);
+                ctx.stroke();
                 
-                // Bagian atas platform (Rumput/Permukaan)
-                ctx.fillStyle = '#81C784'; // Hijau lembut
-                ctx.fillRect(this.x, this.y, this.w, 10);
-
                 ctx.restore();
             }
         }
@@ -550,7 +416,6 @@
                 ctx.save();
                 ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
                 ctx.fillStyle = this.color;
-                // Partikel membulat agar lebih soft
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -558,12 +423,535 @@
             }
         }
 
+        class Projectile {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.r = 8;
+                this.active = true;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+
+                // Trail partikel api
+                if (Math.random() > 0.5) {
+                    particles.push(new Particle(this.x, this.y, -this.vx*0.2, -this.vy*0.2, '#FF0044', 0.2));
+                }
+
+                // Kena player?
+                if (this.active && !player.isDashing) {
+                    // Hitbox lingkaran peluru ke kotak player
+                    let testX = Math.max(player.x, Math.min(this.x, player.x + player.w));
+                    let testY = Math.max(player.y, Math.min(this.y, player.y + player.h));
+                    let distX = this.x - testX;
+                    let distY = this.y - testY;
+                    if ((distX*distX + distY*distY) < this.r*this.r) {
+                        // KENA!
+                        gameOver("TERKENA LASER BOSS!");
+                        this.active = false;
+                    }
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+                ctx.save();
+                ctx.fillStyle = '#FF0044';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r/2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- ENTITAS UTAMA ---
+
+        class Boss {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.active = false;
+                this.x = 0;
+                this.y = 0;
+                this.w = 80;
+                this.h = 80;
+                this.maxHp = 5;
+                this.hp = this.maxHp;
+                this.state = 'hidden'; // hidden, entering, fighting, dying
+                this.shootTimer = 0;
+                this.hoverOffset = 0;
+                
+                // Posisi target
+                this.targetX = 0;
+                this.targetY = 0;
+            }
+
+            spawn(startX, startY) {
+                this.active = true;
+                this.x = startX + 500; // Mulai dari luar layar kanan
+                this.y = startY - 200;
+                this.hp = this.maxHp;
+                this.state = 'entering';
+                
+                bossHpContainer.style.display = 'block';
+                this.updateHpBar();
+                createParticles(this.x, this.y, 50, '#333', 10);
+            }
+
+            updateHpBar() {
+                bossHpBar.style.width = `${(this.hp / this.maxHp) * 100}%`;
+            }
+
+            takeDamage() {
+                this.hp--;
+                this.updateHpBar();
+                createParticles(this.x + this.w/2, this.y + this.h/2, 30, '#FF0044', 8);
+                camera.shake = 15;
+
+                // Flash putih (di-handle di draw)
+                this.isFlashing = 0.1; 
+
+                if (this.hp <= 0) {
+                    this.die();
+                } else {
+                    // Knockback sedikit saat kena hit
+                    this.x += 100;
+                }
+            }
+
+            die() {
+                this.state = 'dying';
+                bossHpContainer.style.display = 'none';
+                camera.shake = 30;
+                
+                // Ledakan besar
+                createParticles(this.x + this.w/2, this.y + this.h/2, 100, '#FF5722', 15);
+                
+                // Jatuhkan buanyak koin (Loot explosion)
+                for(let i=0; i<15; i++) {
+                    let c = new Coin(this.x + this.w/2 + (Math.random()*100-50), this.y + this.h/2 + (Math.random()*100-50));
+                    c.baseY = c.y; // Koin mengambang di udara bebas
+                    coins.push(c);
+                }
+
+                setTimeout(() => {
+                    this.active = false;
+                    this.state = 'hidden';
+                }, 500); // Tunggu bentar sebelum hilang total
+            }
+
+            update(dt) {
+                if (!this.active || this.state === 'dying') return;
+
+                if (this.isFlashing > 0) this.isFlashing -= dt;
+
+                this.hoverOffset += dt * 3;
+
+                // Perilaku Boss
+                if (this.state === 'entering') {
+                    // Maju pelan ke arah player
+                    this.targetX = player.x + width/3;
+                    this.targetY = player.y - 150;
+                    
+                    this.x += (this.targetX - this.x) * 2 * dt;
+                    this.y += (this.targetY - this.y) * 2 * dt;
+
+                    if (Math.abs(this.x - this.targetX) < 50) {
+                        this.state = 'fighting';
+                    }
+                } 
+                else if (this.state === 'fighting') {
+                    // Ikuti player, tapi melayang naik turun
+                    this.targetX = player.x + width/2.5;
+                    this.targetY = player.y - 150 + Math.sin(this.hoverOffset) * 50;
+
+                    this.x += (this.targetX - this.x) * 3 * dt;
+                    this.y += (this.targetY - this.y) * 3 * dt;
+
+                    // Menembak
+                    this.shootTimer -= dt;
+                    if (this.shootTimer <= 0) {
+                        this.shootTimer = 1.2; // Tembak tiap 1.2 detik
+                        
+                        // Hitung arah tembakan (Arahin ke player)
+                        let dx = (player.x + player.w/2) - (this.x + this.w/2);
+                        let dy = (player.y + player.h/2) - (this.y + this.h/2);
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        let speed = 400;
+
+                        projectiles.push(new Projectile(
+                            this.x + this.w/2, 
+                            this.y + this.h/2 + 20, 
+                            (dx/dist)*speed, 
+                            (dy/dist)*speed
+                        ));
+                        
+                        // Recoil mundur dikit
+                        this.x += 20;
+                    }
+
+                    // Logika tabrakan Boss vs Player (Damage Boss dengan Dash)
+                    if (player.isDashing) {
+                        // Kotak boss vs kotak player
+                        if (player.x < this.x + this.w &&
+                            player.x + player.w > this.x &&
+                            player.y < this.y + this.h &&
+                            player.y + player.h > this.y) 
+                        {
+                            this.takeDamage();
+                            // Bikin player nendang mundur (biar gak nge-hit berkali-kali dalam 1 dash)
+                            player.vx = -800;
+                            player.vy = -400;
+                            player.isDashing = false;
+                        }
+                    } else if (player.checkCollision({x: this.x, y: this.y, w: this.w, h: this.h})) {
+                        // Kalo nabrak biasa, player yang mati
+                        gameOver("NABRAK BOSS!");
+                    }
+                }
+            }
+
+            draw() {
+                if (!this.active || this.state === 'dying') return;
+
+                ctx.save();
+                ctx.translate(this.x + this.w/2, this.y + this.h/2);
+                
+                // Floating animation logic rotation
+                ctx.rotate(Math.sin(this.hoverOffset * 0.5) * 0.1);
+
+                if (this.isFlashing > 0) {
+                    ctx.fillStyle = '#fff';
+                } else {
+                    ctx.fillStyle = '#333';
+                }
+
+                // Badan utama boss (Kotak bulat)
+                ctx.beginPath();
+                ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 15);
+                ctx.fill();
+
+                // Sayap mesin
+                ctx.fillStyle = '#555';
+                ctx.fillRect(-this.w/2 - 20, -10, 20, 20); // Sayap kiri
+                ctx.fillRect(this.w/2, -10, 20, 20);      // Sayap kanan
+                
+                // Efek Jet di bawah sayap
+                ctx.fillStyle = '#FF5722';
+                ctx.globalAlpha = 0.7 + Math.random()*0.3;
+                ctx.beginPath();
+                ctx.moveTo(-this.w/2 - 15, 10);
+                ctx.lineTo(-this.w/2 - 5, 10);
+                ctx.lineTo(-this.w/2 - 10, 30 + Math.random()*20);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(this.w/2 + 5, 10);
+                ctx.lineTo(this.w/2 + 15, 10);
+                ctx.lineTo(this.w/2 + 10, 30 + Math.random()*20);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Mata Besar (Bersinar)
+                ctx.fillStyle = '#FF0044';
+                ctx.beginPath();
+                ctx.arc(0, 0, 25, 0, Math.PI*2);
+                ctx.fill();
+
+                // Pupil hitam
+                ctx.fillStyle = '#111';
+                // Lacak player dengan mata
+                let eyeOffset = 0;
+                if (this.state === 'fighting') eyeOffset = (player.x - this.x < 0) ? -8 : 8;
+                ctx.beginPath();
+                ctx.arc(eyeOffset, 0, 10, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        class Player {
+            constructor() {
+                this.w = 30;
+                this.h = 40;
+                this.reset();
+            }
+
+            reset() {
+                this.x = 100;
+                this.y = height / 2 - 100; // Mulai dari tengah aman
+                this.vx = 0;
+                this.vy = 0;
+                this.speed = 450; 
+                this.jumpForce = -750;
+                this.gravity = 2000;
+                this.friction = 0.80; 
+                
+                this.isGrounded = false;
+                this.jumpsLeft = 2;
+                this.wallSliding = false;
+                this.wallDirection = 0; 
+                
+                this.isDashing = false;
+                this.dashTime = 0;
+                this.dashDuration = 0.15; 
+                this.dashSpeed = 1500;
+                this.dashCooldown = 0;
+                this.canDash = true;
+
+                this.coyoteTime = 0;
+                this.jumpBuffer = 0;
+
+                // Rotasi animasi
+                this.rotation = 0;
+                this.color = '#FF5722'; 
+            }
+
+            update(dt) {
+                if (this.dashCooldown > 0) this.dashCooldown -= dt;
+                if (this.coyoteTime > 0) this.coyoteTime -= dt;
+                if (this.jumpBuffer > 0) this.jumpBuffer -= dt;
+
+                if (this.isGrounded) {
+                    this.coyoteTime = 0.1; 
+                    // Normalkan rotasi jika di tanah
+                    this.rotation = 0;
+                }
+                
+                if (jumpJustPressed) {
+                    this.jumpBuffer = 0.15; 
+                }
+
+                // --- DASH LOGIC ---
+                if (dashJustPressed && this.canDash && this.dashCooldown <= 0) {
+                    this.isDashing = true;
+                    this.dashTime = this.dashDuration;
+                    this.canDash = false; 
+                    this.vy = 0; 
+                    this.vx = keys.left ? -this.dashSpeed : this.dashSpeed; 
+                    if (!keys.left && !keys.right) this.vx = this.dashSpeed; 
+                    
+                    createParticles(this.x + this.w/2, this.y + this.h/2, 20, '#fff', 5);
+                    camera.shake = 8;
+                }
+
+                if (this.isDashing) {
+                    this.dashTime -= dt;
+                    if (this.dashTime <= 0) {
+                        this.isDashing = false;
+                        this.dashCooldown = 0.4;
+                        this.vx *= 0.4; 
+                    }
+                    if (Math.random() > 0.3) {
+                        particles.push(new Particle(this.x + this.w/2, this.y + this.h/2 + (Math.random()*20-10), 0, 0, '#FF5722', 0.2));
+                    }
+                    this.rotation = 0; // Kunci rotasi saat dash
+                } else {
+                    // --- NORMAL MOVEMENT ---
+                    let moveDir = 0;
+                    if (keys.right) moveDir += 1;
+                    if (keys.left) moveDir -= 1;
+
+                    if (moveDir !== 0) {
+                        this.vx += moveDir * this.speed * 8 * dt;
+                    } else {
+                        this.vx *= Math.pow(this.friction, dt * 60);
+                    }
+
+                    if (Math.abs(this.vx) > this.speed) {
+                        this.vx = Math.sign(this.vx) * this.speed;
+                    }
+
+                    // Gravitasi & Wall Slide
+                    if (this.wallSliding && this.vy > 0) {
+                        this.vy = 150; 
+                        if (Math.random() > 0.8) {
+                            createParticles(this.wallDirection > 0 ? this.x + this.w : this.x, this.y + this.h, 1, '#ccc', 2);
+                        }
+                    } else {
+                        this.vy += this.gravity * dt;
+                    }
+                    if (this.vy > 1200) this.vy = 1200; 
+
+                    // Animasi putar di udara
+                    if (!this.isGrounded && !this.wallSliding) {
+                        this.rotation += (this.vx * 0.005); 
+                    }
+                }
+
+                let nextX = this.x + this.vx * dt;
+                let nextY = this.y + this.vy * dt;
+
+                this.isGrounded = false;
+                this.wallSliding = false;
+                this.wallDirection = 0;
+
+                // Tabrakan Axis X
+                this.x = nextX;
+                for (let plat of platforms) {
+                    if (this.checkCollision(plat)) {
+                        if (this.vx > 0) { 
+                            this.x = plat.x - this.w;
+                            this.wallDirection = 1;
+                        } else if (this.vx < 0) { 
+                            this.x = plat.x + plat.w;
+                            this.wallDirection = -1;
+                        }
+                        this.vx = 0;
+                        if (!this.isGrounded && this.vy > 0) {
+                            this.wallSliding = true;
+                            this.rotation = 0; // Berhenti mutar kalau nempel tembok
+                        }
+                    }
+                }
+
+                // Tabrakan Axis Y
+                this.y += this.vy * dt;
+                for (let plat of platforms) {
+                    if (this.checkCollision(plat)) {
+                        if (this.vy > 0) { 
+                            if (this.vy > 900) {
+                                camera.shake = 8;
+                                createParticles(this.x + this.w/2, this.y + this.h, 15, '#bbb', 4);
+                            }
+                            this.y = plat.y - this.h;
+                            this.isGrounded = true;
+                            this.jumpsLeft = 2; 
+                            this.canDash = true; 
+                        } else if (this.vy < 0) { 
+                            this.y = plat.y + plat.h;
+                        }
+                        this.vy = 0;
+                    }
+                }
+
+                // --- JUMP LOGIC ---
+                if (this.jumpBuffer > 0) {
+                    if (this.wallSliding) {
+                        this.vy = this.jumpForce * 0.9;
+                        this.vx = this.wallDirection * -this.speed * 1.3; 
+                        this.wallSliding = false;
+                        this.isDashing = false;
+                        this.jumpBuffer = 0;
+                        createParticles(this.wallDirection > 0 ? this.x + this.w : this.x, this.y + this.h/2, 10, '#ddd', 4);
+                    } else if (this.coyoteTime > 0) {
+                        this.vy = this.jumpForce;
+                        this.coyoteTime = 0;
+                        this.jumpBuffer = 0;
+                        this.jumpsLeft--;
+                        createParticles(this.x + this.w/2, this.y + this.h, 10, '#ddd', 3);
+                    } else if (this.jumpsLeft > 0 && !this.isGrounded) {
+                        this.vy = this.jumpForce * 0.85;
+                        this.jumpsLeft--;
+                        this.jumpBuffer = 0;
+                        this.isDashing = false; 
+                        
+                        // Paksa rotasi salto ke arah jalan
+                        this.rotation = (this.vx >= 0) ? 0.5 : -0.5;
+
+                        createParticles(this.x + this.w/2, this.y + this.h, 15, '#FF5722', 4);
+                    }
+                }
+
+                // --- BATAS KEMATIAN JATUH (FIXED) ---
+                // Karena kita membatasi kamera agar tidak turun ke bawah area platform,
+                // maka jika player turun melewatinya secara absolut, game over.
+                // Anggap tinggi viewport `height`. Kalau turun melebihinya, mati.
+                if (this.y > camera.y + height + 100) {
+                    gameOver("TERJATUH KE JURANG!");
+                }
+            }
+
+            draw() {
+                ctx.save();
+                
+                let squashX = this.w;
+                let squashY = this.h;
+
+                if (this.isDashing) {
+                    squashX = this.w + 25;
+                    squashY = this.h - 20;
+                } else if (!this.isGrounded) {
+                    let stretch = Math.min(Math.abs(this.vy) / 100, 10);
+                    squashY = this.h + stretch;
+                    squashX = this.w - stretch/2;
+                }
+
+                let drawX = this.x + (this.w - squashX) / 2;
+                let drawY = this.y + (this.h - squashY); 
+
+                // Terapkan rotasi di tengah kotak yang melar
+                ctx.translate(drawX + squashX/2, drawY + squashY/2);
+                ctx.rotate(this.rotation);
+                
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-squashX/2, -squashY/2, squashX, squashY);
+
+                // Mata
+                ctx.fillStyle = '#fff';
+                let eyeOffsetX = keys.left ? -5 : (keys.right ? 5 : 0);
+                
+                // Kalau dash, matanya sipit (garis)
+                if (this.isDashing) {
+                    ctx.fillRect(eyeOffsetX - 5, -5, 6, 2);
+                    ctx.fillRect(eyeOffsetX + 3, -5, 6, 2);
+                } else {
+                    ctx.fillRect(eyeOffsetX - 5, -5, 5, 5);
+                    ctx.fillRect(eyeOffsetX + 3, -5, 5, 5);
+                }
+
+                ctx.restore();
+            }
+
+            checkCollision(rect) {
+                return this.x < rect.x + rect.w &&
+                       this.x + this.w > rect.x &&
+                       this.y < rect.y + rect.h &&
+                       this.y + this.h > rect.y;
+            }
+        }
+
+        class Platform {
+            constructor(x, y, w, h) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.fillStyle = '#455A64'; 
+                ctx.fillRect(this.x, this.y, this.w, this.h);
+                
+                ctx.fillStyle = '#81C784'; 
+                ctx.fillRect(this.x, this.y, this.w, 10);
+                ctx.restore();
+            }
+        }
+
         // --- MANAJEMEN GAME ---
 
         let player = new Player();
+        let gameBoss = new Boss();
         let platforms = [];
         let particles = [];
-        let levelEnd = 0; // Batas kanan map saat ini
+        let coins = [];
+        let projectiles = [];
+        
+        let levelEnd = 0; 
+        let nextBossDistance = 2500;
 
         function createParticles(x, y, count, color, speedMultiplier = 1) {
             for (let i = 0; i < count; i++) {
@@ -578,51 +966,77 @@
         }
 
         function generateWorld() {
-            // Level awal
             if (platforms.length === 0) {
-                platforms.push(new Platform(-100, height - 100, 800, 500));
+                platforms.push(new Platform(-100, height - 150, 800, 500));
                 levelEnd = 700;
             }
 
-            // Generate platform ke depan
             while (levelEnd < camera.x + width * 2) {
-                let gapX = Math.random() * 150 + 100; // Jarak gap lebih masuk akal
-                let platW = Math.random() * 250 + 150; // Lebar cukup untuk mendarat
+                let gapX = Math.random() * 150 + 100; 
+                let platW = Math.random() * 250 + 150; 
                 
                 let type = Math.floor(Math.random() * 10);
                 let platY;
 
+                // Batas Y atas agar tidak keluar screen terus
+                let minY = 150; 
+
                 if (type < 5) {
-                    // Normal
                     platY = height - 150 - Math.random() * 80;
                 } else if (type < 8) {
-                    // Naik tangga / Platform tinggi
                     platY = height - 250 - Math.random() * 100;
                 } else {
-                    // Dinding untuk Wall Jump
                     platY = height - 350;
-                    platW = 80; // Lebar dinding kecil
-                    // Alas agar tidak jatuh langsung
+                    platW = 80; 
                     platforms.push(new Platform(levelEnd + gapX - 30, height - 50, 150, 400));
                 }
 
-                // Pastikan platform tidak terlalu rendah dari sebelumnya
+                if (platY < minY) platY = minY;
+
                 platforms.push(new Platform(levelEnd + gapX, platY, platW, 800)); 
+                
+                // --- GENERATE KOIN ---
+                // 50% kemungkinan ada koin di atas platform baru
+                if (Math.random() > 0.5) {
+                    let numCoins = Math.floor(Math.random() * 3) + 2; // 2-4 koin
+                    let step = platW / (numCoins + 1);
+                    for(let i = 1; i <= numCoins; i++) {
+                        // Koin bentuk melengkung seperti pelangi di atas platform
+                        let archY = Math.sin((i / (numCoins+1)) * Math.PI) * 40;
+                        coins.push(new Coin(levelEnd + gapX + step * i - 10, platY - 40 - archY));
+                    }
+                }
+
                 levelEnd += gapX + platW;
             }
 
-            // Bersihkan platform yang sudah jauh di belakang
+            // Garbage Collection (bersihkan object yang udah jauh di belakang)
             platforms = platforms.filter(p => p.x + p.w > camera.x - width);
+            coins = coins.filter(c => c.x > camera.x - width && !c.collected);
+            projectiles = projectiles.filter(p => p.x > camera.x - width && p.active);
         }
 
         function startGame() {
             player.reset();
+            gameBoss.reset();
             platforms = [];
             particles = [];
+            coins = [];
+            projectiles = [];
+            
             levelEnd = 0;
             score = 0;
-            camera.x = 0;
-            camera.y = 0;
+            coinsCollected = 0;
+            nextBossDistance = 2500;
+            
+            scoreElement.innerText = '0';
+            coinScoreElement.innerText = '0';
+            bossHpContainer.style.display = 'none';
+
+            // Kamera diset di tengah player awal
+            camera.x = player.x - width/3;
+            camera.y = 0; 
+            
             gameState = 'PLAYING';
             uiLayer.classList.add('hidden');
             generateWorld();
@@ -631,85 +1045,99 @@
             requestAnimationFrame(gameLoop);
         }
 
-        function gameOver() {
+        function gameOver(reason) {
             gameState = 'GAMEOVER';
             uiLayer.classList.remove('hidden');
-            gameTitle.innerText = "TERJATUH!";
-            gameTitle.style.color = "#FF5722";
-            gameTitle.style.textShadow = "3px 3px 0px #333";
-            gameDesc.innerText = `Skor Akhir: ${Math.floor(score)}\nAyo coba lagi!`;
-            startBtn.innerText = "MAIN LAGI";
+            bossHpContainer.style.display = 'none';
             
-            // Efek kematian
-            createParticles(player.x + player.w/2, player.y + player.h/2, 50, '#FF5722', 5);
+            gameTitle.innerText = reason || "GAME OVER";
+            gameTitle.style.color = "#FF0044";
+            gameTitle.style.textShadow = "3px 3px 0px #333";
+            
+            // Kalkulasi Total Skor
+            let finalScore = Math.floor(score) + (coinsCollected * 50);
+            gameDesc.innerHTML = `Jarak: ${Math.floor(score)}m<br>Koin: ${coinsCollected} x 50<br><b>TOTAL SKOR: <span style="font-size: 24px;">${finalScore}</span></b>`;
+            startBtn.innerText = "COBA LAGI";
+            
+            createParticles(player.x + player.w/2, player.y + player.h/2, 50, '#FF0044', 5);
             camera.shake = 30;
         }
 
         // --- GAME LOOP ---
 
         function update(dt) {
-            // Batasi dt jika tab tertutup (mencegah bug tembus tembok)
             if (dt > 0.1) dt = 0.1;
+            globalTime += dt;
 
             if (gameState === 'PLAYING') {
                 player.update(dt);
                 
-                // Hitung skor berdasarkan jarak tempuh maksimum
-                if (player.x > score) {
-                    score = player.x;
-                    scoreElement.innerText = Math.floor(score / 10);
+                // Update Skor Jarak
+                if (player.x / 10 > score) {
+                    score = player.x / 10;
+                    scoreElement.innerText = Math.floor(score);
                 }
+
+                // Cek Spawn Boss
+                if (!gameBoss.active && score > nextBossDistance) {
+                    gameBoss.spawn(player.x, player.y);
+                    nextBossDistance += 3000; // Boss selanjutnya muncul 3000m kemudian
+                }
+
+                if (gameBoss.active) {
+                    gameBoss.update(dt);
+                }
+
+                for(let c of coins) c.update(dt);
+                for(let p of projectiles) p.update(dt);
 
                 generateWorld();
 
-                // Kamera mengikuti player dengan smoothing
+                // --- KAMERA LOGIC ---
                 let targetCamX = player.x - width / 3;
                 let targetCamY = player.y - height / 1.5;
 
-                // Jangan mundur terlalu jauh ke kiri
+                // Jangan mundur ke kiri
                 if (targetCamX < camera.x) targetCamX = camera.x;
+                
+                // KUNCI KAMERA: Jangan sampai turun melebihi batas Y tertentu (mencegah bug jatuh infitit)
+                // Tinggi minimum platform sekitar height - 50. Jadi kita buat kamera tidak bisa menembus itu.
+                let maxCamY = 100; // Maksimal kamera boleh turun ke Y=100
+                if (targetCamY > maxCamY) targetCamY = maxCamY;
 
                 camera.x += (targetCamX - camera.x) * 5 * dt;
-                // Vertical camera movement lebih pelan biar gak pusing
                 camera.y += (targetCamY - camera.y) * 3 * dt;
             }
 
-            // Update partikel
             for (let i = particles.length - 1; i >= 0; i--) {
                 particles[i].update(dt);
-                if (particles[i].life <= 0) {
-                    particles.splice(i, 1);
-                }
+                if (particles[i].life <= 0) particles.splice(i, 1);
             }
 
-            // Update Kamera Shake
             if (camera.shake > 0) {
-                camera.shake *= 0.9; // Berkurang eksponensial
+                camera.shake *= 0.9; 
                 if (camera.shake < 0.5) camera.shake = 0;
             }
 
-            // Reset tombol trigger satu frame
             jumpJustPressed = false;
             dashJustPressed = false;
         }
 
         function draw() {
-            // Background siang hari / langit bersih
+            // Background siang
             ctx.fillStyle = '#87CEEB';
             ctx.fillRect(0, 0, width, height);
             
             ctx.save();
             
-            // Terapkan kamera dan shake
             let shakeX = (Math.random() - 0.5) * camera.shake;
             let shakeY = (Math.random() - 0.5) * camera.shake;
             ctx.translate(-camera.x + shakeX, -camera.y + shakeY);
 
-            // Awan / Elemen Parallax (opsional, sangat simpel)
+            // Awan Parallax
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             let startX = Math.floor(camera.x / 500) * 500;
             for(let x = startX - 500; x < startX + width + 500; x += 400) {
-                // Awan statis digambar dengan posisi parallax (bergerak lebih lambat)
                 let parallaxX = x + (camera.x * 0.5) % 400; 
                 ctx.beginPath();
                 ctx.arc(parallaxX, 150, 40, 0, Math.PI * 2);
@@ -718,18 +1146,13 @@
                 ctx.fill();
             }
 
-            // Gambar Entitas
-            for (let plat of platforms) {
-                plat.draw();
-            }
-
-            for (let p of particles) {
-                p.draw();
-            }
-
-            if (gameState === 'PLAYING') {
-                player.draw();
-            }
+            for (let plat of platforms) plat.draw();
+            for (let c of coins) c.draw();
+            for (let p of projectiles) p.draw();
+            if (gameBoss.active) gameBoss.draw();
+            
+            if (gameState === 'PLAYING') player.draw();
+            for (let p of particles) p.draw();
 
             ctx.restore();
         }
@@ -746,10 +1169,9 @@
             }
         }
 
-        // --- INISIALISASI AWAL ---
+        // --- INISIALISASI ---
         startBtn.addEventListener('click', startGame);
         
-        // Draw awal menu screen (background kosong yang keren)
         camera.x = 0; camera.y = 0;
         platforms.push(new Platform(0, height - 100, width, 200));
         draw();
