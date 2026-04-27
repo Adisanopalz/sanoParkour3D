@@ -1329,14 +1329,18 @@
 
         function getBackgroundColor() {
             let cycleTime = 60; // 1 Siklus Penuh = 60 detik
-            let timeInCycle = globalTime % cycleTime;
+            let timeInCycle = Math.max(0, globalTime || 0) % cycleTime;
+            
             let phaseProgress = timeInCycle / (cycleTime / 4);
-            let currentPhase = Math.floor(phaseProgress);
+            let currentPhase = Math.floor(phaseProgress) % 4; // Ditambah % 4 untuk pencegahan bug
             let nextPhase = (currentPhase + 1) % 4;
-            let lerp = phaseProgress - currentPhase;
+            let lerp = phaseProgress - Math.floor(phaseProgress);
 
             let c1 = timeColors[currentPhase];
             let c2 = timeColors[nextPhase];
+
+            // Fallback aman jika terdapat kejanggalan dalam penghitungan globalTime
+            if (!c1 || !c2) return 'rgb(135, 206, 235)'; 
 
             let r = Math.floor(c1.r + (c2.r - c1.r) * lerp);
             let g = Math.floor(c1.g + (c2.g - c1.g) * lerp);
