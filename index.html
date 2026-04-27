@@ -217,6 +217,61 @@
             background: rgba(255, 87, 34, 1);
         }
 
+        /* Menu Stats & Shop */
+        #menu-stats {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #FF5722;
+            font-weight: bold;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #shop-modal {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 4px solid #333;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: auto;
+            z-index: 20;
+            max-width: 400px;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .shop-item {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .shop-item:hover { transform: scale(1.05); }
+        .shop-item.owned { border-color: #81C784; background: #e8f5e9; }
+        .shop-item.equipped { border-color: #FF5722; background: #ffebee; }
+
+        .skin-preview {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px auto;
+            border: 2px solid #333;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -237,12 +292,25 @@
     <div id="ui-layer">
         <div id="message-box">
             <h1 id="game-title">Parkour Dash</h1>
+            <div id="menu-stats">High Score: <span id="high-score-display">0</span>m | Total Koin: <span id="total-coins-display">0</span></div>
             <p id="game-desc" class="controls-info">
                 PC: <span>WASD / Panah</span> untuk gerak, <span>Spasi</span> Lompat, <span>Shift</span> Dash.<br>
                 Tips: <span>DASH</span> menembus bos untuk memberikan Damage!<br><br>
                 Kumpulkan koin dan bertahan hidup sejauh mungkin.
             </p>
-            <button id="start-btn">Mulai Game</button>
+            <div class="btn-group">
+                <button id="start-btn">Mulai Game</button>
+                <button id="shop-btn" style="background:#455A64;">Toko Koin</button>
+            </div>
+        </div>
+
+        <div id="shop-modal">
+            <h2 style="color:#333;">TOKO SKIN</h2>
+            <div style="font-weight:bold; color:#b8860b;">Koin Anda: <span id="shop-coins">0</span></div>
+            <div class="shop-items" id="shop-container">
+                <!-- Items disisipkan JS -->
+            </div>
+            <button id="close-shop-btn" style="background:#555; font-size:16px; padding:10px 20px;">Tutup</button>
         </div>
     </div>
 
@@ -286,6 +354,81 @@
         }
         window.addEventListener('resize', resize);
         resize();
+
+        // --- SISTEM SAVE LOKAL ---
+        let gameData = {
+            totalCoins: 0,
+            highScore: 0,
+            skins: ['#FF5722'],
+            equippedSkin: '#FF5722'
+        };
+
+        function loadData() {
+            let saved = localStorage.getItem('parkourDashSaveDataV2');
+            if (saved) gameData = JSON.parse(saved);
+            updateMenuStats();
+        }
+
+        function saveData() {
+            localStorage.setItem('parkourDashSaveDataV2', JSON.stringify(gameData));
+        }
+
+        function updateMenuStats() {
+            document.getElementById('high-score-display').innerText = Math.floor(gameData.highScore);
+            document.getElementById('total-coins-display').innerText = gameData.totalCoins;
+            document.getElementById('shop-coins').innerText = gameData.totalCoins;
+        }
+
+        // --- SISTEM AUDIO (SFX) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function playSound(type) {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'jump') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'dash') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'hit') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'powerup') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            }
+        }
 
         // --- GLOBAL VARIABLES ---
         let gameState = 'START'; 
@@ -355,11 +498,23 @@
                 // Animasi mengambang
                 this.y = this.baseY + Math.sin(globalTime * 3 + this.timeOffset) * 10;
                 
+                // Fitur Magnet 
+                if (player.hasMagnet && !this.collected) {
+                    let dx = (player.x + player.w/2) - (this.x + 10);
+                    let dy = (player.y + player.h/2) - (this.y + 10);
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 300) {
+                        this.x += (dx/dist) * 600 * dt;
+                        this.baseY += (dy/dist) * 600 * dt;
+                    }
+                }
+
                 // Cek tabrakan dengan player
                 if (!this.collected && player.checkCollision(this)) {
                     this.collected = true;
                     coinsCollected++;
                     coinScoreElement.innerText = coinsCollected;
+                    playSound('coin');
                     createParticles(this.x + 10, this.y + 10, 8, 'gold', 3);
                     
                     // Sedikit lompat skor
@@ -423,6 +578,55 @@
             }
         }
 
+        // --- POWER UPS (Fitur Anti Boring Tambahan) ---
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.baseY = y;
+                this.y = y;
+                this.w = 25;
+                this.h = 25;
+                this.type = type; // 'magnet' atau 'shield'
+                this.collected = false;
+                this.timeOffset = Math.random() * Math.PI * 2;
+            }
+
+            update(dt) {
+                this.y = this.baseY + Math.sin(globalTime * 4 + this.timeOffset) * 15;
+                if (!this.collected && player.checkCollision(this)) {
+                    this.collected = true;
+                    playSound('powerup');
+                    if (this.type === 'magnet') {
+                        player.hasMagnet = true;
+                        player.magnetTimer = 10; // Aktif 10 detik
+                        createParticles(this.x, this.y, 15, '#00BCD4', 4);
+                    } else if (this.type === 'shield') {
+                        player.hasShield = true;
+                        createParticles(this.x, this.y, 15, '#4CAF50', 4);
+                    }
+                }
+            }
+
+            draw() {
+                if (this.collected) return;
+                ctx.save();
+                ctx.translate(this.x + this.w/2, this.y + this.h/2);
+                ctx.rotate(globalTime * 2);
+                
+                ctx.fillStyle = this.type === 'magnet' ? '#00BCD4' : '#4CAF50';
+                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.rotate(-globalTime * 2); // Putar balik buat teks biar tetap tegak
+                ctx.fillText(this.type === 'magnet' ? 'M' : 'S', 0, 0);
+
+                ctx.restore();
+            }
+        }
+
         class Projectile {
             constructor(x, y, vx, vy) {
                 this.x = x;
@@ -450,9 +654,15 @@
                     let distX = this.x - testX;
                     let distY = this.y - testY;
                     if ((distX*distX + distY*distY) < this.r*this.r) {
-                        // KENA!
-                        gameOver("TERKENA LASER BOSS!");
-                        this.active = false;
+                        if (player.hasShield) {
+                            player.hasShield = false;
+                            this.active = false;
+                            playSound('hit');
+                            createParticles(player.x + player.w/2, player.y + player.h/2, 20, '#4CAF50', 5);
+                        } else {
+                            gameOver("TERKENA LASER BOSS!");
+                            this.active = false;
+                        }
                     }
                 }
             }
@@ -516,6 +726,7 @@
             takeDamage() {
                 this.hp--;
                 this.updateHpBar();
+                playSound('hit');
                 createParticles(this.x + this.w/2, this.y + this.h/2, 30, '#FF0044', 8);
                 camera.shake = 15;
 
@@ -534,6 +745,7 @@
                 this.state = 'dying';
                 bossHpContainer.style.display = 'none';
                 camera.shake = 30;
+                playSound('hit');
                 
                 // Ledakan besar
                 createParticles(this.x + this.w/2, this.y + this.h/2, 100, '#FF5722', 15);
@@ -583,6 +795,7 @@
                     this.shootTimer -= dt;
                     if (this.shootTimer <= 0) {
                         this.shootTimer = 1.2; // Tembak tiap 1.2 detik
+                        playSound('jump'); // Suara tembakan pelan
                         
                         // Hitung arah tembakan (Arahin ke player)
                         let dx = (player.x + player.w/2) - (this.x + this.w/2);
@@ -617,7 +830,15 @@
                         }
                     } else if (player.checkCollision({x: this.x, y: this.y, w: this.w, h: this.h})) {
                         // Kalo nabrak biasa, player yang mati
-                        gameOver("NABRAK BOSS!");
+                        if (player.hasShield) {
+                            player.hasShield = false;
+                            player.vx = -800;
+                            player.vy = -400;
+                            playSound('hit');
+                            createParticles(player.x + player.w/2, player.y + player.h/2, 20, '#4CAF50', 5);
+                        } else {
+                            gameOver("NABRAK BOSS!");
+                        }
                     }
                 }
             }
@@ -713,20 +934,26 @@
                 this.coyoteTime = 0;
                 this.jumpBuffer = 0;
 
-                // Rotasi animasi
-                this.rotation = 0;
-                this.color = '#FF5722'; 
+                // Powerups
+                this.hasMagnet = false;
+                this.magnetTimer = 0;
+                this.hasShield = false;
+
+                // Skin dari data
+                this.color = gameData.equippedSkin || '#FF5722'; 
             }
 
             update(dt) {
                 if (this.dashCooldown > 0) this.dashCooldown -= dt;
                 if (this.coyoteTime > 0) this.coyoteTime -= dt;
                 if (this.jumpBuffer > 0) this.jumpBuffer -= dt;
+                if (this.magnetTimer > 0) {
+                    this.magnetTimer -= dt;
+                    if (this.magnetTimer <= 0) this.hasMagnet = false;
+                }
 
                 if (this.isGrounded) {
                     this.coyoteTime = 0.1; 
-                    // Normalkan rotasi jika di tanah
-                    this.rotation = 0;
                 }
                 
                 if (jumpJustPressed) {
@@ -742,6 +969,7 @@
                     this.vx = keys.left ? -this.dashSpeed : this.dashSpeed; 
                     if (!keys.left && !keys.right) this.vx = this.dashSpeed; 
                     
+                    playSound('dash');
                     createParticles(this.x + this.w/2, this.y + this.h/2, 20, '#fff', 5);
                     camera.shake = 8;
                 }
@@ -754,9 +982,8 @@
                         this.vx *= 0.4; 
                     }
                     if (Math.random() > 0.3) {
-                        particles.push(new Particle(this.x + this.w/2, this.y + this.h/2 + (Math.random()*20-10), 0, 0, '#FF5722', 0.2));
+                        particles.push(new Particle(this.x + this.w/2, this.y + this.h/2 + (Math.random()*20-10), 0, 0, this.color, 0.2));
                     }
-                    this.rotation = 0; // Kunci rotasi saat dash
                 } else {
                     // --- NORMAL MOVEMENT ---
                     let moveDir = 0;
@@ -784,10 +1011,7 @@
                     }
                     if (this.vy > 1200) this.vy = 1200; 
 
-                    // Animasi putar di udara
-                    if (!this.isGrounded && !this.wallSliding) {
-                        this.rotation += (this.vx * 0.005); 
-                    }
+                    // Salto Animasi dihapus
                 }
 
                 let nextX = this.x + this.vx * dt;
@@ -844,12 +1068,14 @@
                         this.wallSliding = false;
                         this.isDashing = false;
                         this.jumpBuffer = 0;
+                        playSound('jump');
                         createParticles(this.wallDirection > 0 ? this.x + this.w : this.x, this.y + this.h/2, 10, '#ddd', 4);
                     } else if (this.coyoteTime > 0) {
                         this.vy = this.jumpForce;
                         this.coyoteTime = 0;
                         this.jumpBuffer = 0;
                         this.jumpsLeft--;
+                        playSound('jump');
                         createParticles(this.x + this.w/2, this.y + this.h, 10, '#ddd', 3);
                     } else if (this.jumpsLeft > 0 && !this.isGrounded) {
                         this.vy = this.jumpForce * 0.85;
@@ -857,19 +1083,22 @@
                         this.jumpBuffer = 0;
                         this.isDashing = false; 
                         
-                        // Paksa rotasi salto ke arah jalan
-                        this.rotation = (this.vx >= 0) ? 0.5 : -0.5;
-
-                        createParticles(this.x + this.w/2, this.y + this.h, 15, '#FF5722', 4);
+                        playSound('jump');
+                        createParticles(this.x + this.w/2, this.y + this.h, 15, this.color, 4);
                     }
                 }
 
-                // --- BATAS KEMATIAN JATUH (FIXED) ---
-                // Karena kita membatasi kamera agar tidak turun ke bawah area platform,
-                // maka jika player turun melewatinya secara absolut, game over.
-                // Anggap tinggi viewport `height`. Kalau turun melebihinya, mati.
+                // --- BATAS KEMATIAN JATUH ---
                 if (this.y > camera.y + height + 100) {
-                    gameOver("TERJATUH KE JURANG!");
+                    if (this.hasShield) {
+                        // Pantulkan ke atas dengan kuat jika punya tameng
+                        this.hasShield = false;
+                        this.vy = -1600;
+                        playSound('hit');
+                        createParticles(this.x + this.w/2, this.y + this.h/2, 30, '#4CAF50', 6);
+                    } else {
+                        gameOver("TERJATUH KE JURANG!");
+                    }
                 }
             }
 
@@ -891,12 +1120,28 @@
                 let drawX = this.x + (this.w - squashX) / 2;
                 let drawY = this.y + (this.h - squashY); 
 
-                // Terapkan rotasi di tengah kotak yang melar
-                ctx.translate(drawX + squashX/2, drawY + squashY/2);
-                ctx.rotate(this.rotation);
+                // Gambar Shield (Aura Hijau)
+                if (this.hasShield) {
+                    ctx.beginPath();
+                    ctx.arc(drawX + squashX/2, drawY + squashY/2, squashY/2 + 10, 0, Math.PI*2);
+                    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#4CAF50';
+                    ctx.stroke();
+                }
+
+                // Gambar Magnet (Aura Biru Bergerak)
+                if (this.hasMagnet) {
+                    ctx.beginPath();
+                    ctx.arc(drawX + squashX/2, drawY + squashY/2, squashY/2 + 20 + Math.sin(globalTime*10)*5, 0, Math.PI*2);
+                    ctx.strokeStyle = 'rgba(0, 188, 212, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
                 
                 ctx.fillStyle = this.color;
-                ctx.fillRect(-squashX/2, -squashY/2, squashX, squashY);
+                ctx.fillRect(drawX, drawY, squashX, squashY);
 
                 // Mata
                 ctx.fillStyle = '#fff';
@@ -949,6 +1194,7 @@
         let particles = [];
         let coins = [];
         let projectiles = [];
+        let powerups = [];
         
         let levelEnd = 0; 
         let nextBossDistance = 2500;
@@ -1007,6 +1253,13 @@
                     }
                 }
 
+                // --- GENERATE POWERUPS ---
+                // 5% kemunculan di tiap platform
+                if (Math.random() < 0.05) {
+                    let type = Math.random() > 0.5 ? 'magnet' : 'shield';
+                    powerups.push(new PowerUp(levelEnd + gapX + platW/2, platY - 60, type));
+                }
+
                 levelEnd += gapX + platW;
             }
 
@@ -1014,28 +1267,21 @@
             platforms = platforms.filter(p => p.x + p.w > camera.x - width);
             coins = coins.filter(c => c.x > camera.x - width && !c.collected);
             projectiles = projectiles.filter(p => p.x > camera.x - width && p.active);
+            powerups = powerups.filter(p => p.x > camera.x - width && !p.collected);
         }
 
         function startGame() {
+            // Aktifkan Engine Audio
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
             player.reset();
             gameBoss.reset();
             platforms = [];
             particles = [];
             coins = [];
             projectiles = [];
-            
-            levelEnd = 0;
-            score = 0;
-            coinsCollected = 0;
-            nextBossDistance = 2500;
-            
-            scoreElement.innerText = '0';
-            coinScoreElement.innerText = '0';
-            bossHpContainer.style.display = 'none';
-
-            // Kamera diset di tengah player awal
-            camera.x = player.x - width/3;
-            camera.y = 0; 
+            powerups = [];
             
             gameState = 'PLAYING';
             uiLayer.classList.add('hidden');
@@ -1049,6 +1295,7 @@
             gameState = 'GAMEOVER';
             uiLayer.classList.remove('hidden');
             bossHpContainer.style.display = 'none';
+            playSound('hit');
             
             gameTitle.innerText = reason || "GAME OVER";
             gameTitle.style.color = "#FF0044";
@@ -1056,11 +1303,46 @@
             
             // Kalkulasi Total Skor
             let finalScore = Math.floor(score) + (coinsCollected * 50);
+
+            // Simpan Progress ke Local Storage
+            gameData.totalCoins += coinsCollected;
+            if (finalScore > gameData.highScore) {
+                gameData.highScore = finalScore;
+            }
+            saveData();
+            updateMenuStats();
+
             gameDesc.innerHTML = `Jarak: ${Math.floor(score)}m<br>Koin: ${coinsCollected} x 50<br><b>TOTAL SKOR: <span style="font-size: 24px;">${finalScore}</span></b>`;
             startBtn.innerText = "COBA LAGI";
             
             createParticles(player.x + player.w/2, player.y + player.h/2, 50, '#FF0044', 5);
             camera.shake = 30;
+        }
+
+        // --- SISTEM WARNA SIANG-MALAM ---
+        const timeColors = [
+            { r: 255, g: 200, b: 200 }, // Pagi
+            { r: 135, g: 206, b: 235 }, // Siang
+            { r: 255, g: 140, b: 0   }, // Sore
+            { r: 10,  g: 10,  b: 40  }  // Malam
+        ];
+
+        function getBackgroundColor() {
+            let cycleTime = 60; // 1 Siklus Penuh = 60 detik
+            let timeInCycle = globalTime % cycleTime;
+            let phaseProgress = timeInCycle / (cycleTime / 4);
+            let currentPhase = Math.floor(phaseProgress);
+            let nextPhase = (currentPhase + 1) % 4;
+            let lerp = phaseProgress - currentPhase;
+
+            let c1 = timeColors[currentPhase];
+            let c2 = timeColors[nextPhase];
+
+            let r = Math.floor(c1.r + (c2.r - c1.r) * lerp);
+            let g = Math.floor(c1.g + (c2.g - c1.g) * lerp);
+            let b = Math.floor(c1.b + (c2.b - c1.b) * lerp);
+
+            return `rgb(${r}, ${g}, ${b})`;
         }
 
         // --- GAME LOOP ---
@@ -1090,6 +1372,7 @@
 
                 for(let c of coins) c.update(dt);
                 for(let p of projectiles) p.update(dt);
+                for(let p of powerups) p.update(dt);
 
                 generateWorld();
 
@@ -1124,10 +1407,23 @@
         }
 
         function draw() {
-            // Background siang
-            ctx.fillStyle = '#87CEEB';
+            // Background siang-malam dinamis
+            ctx.fillStyle = getBackgroundColor();
             ctx.fillRect(0, 0, width, height);
             
+            // Bintang jika sudah malam
+            let isNightProgress = (globalTime % 60) / 60; // 0.75 - 1.0 adalah malam
+            if (isNightProgress > 0.6 && isNightProgress < 0.9) {
+                let starAlpha = Math.sin((isNightProgress - 0.6) * Math.PI / 0.3);
+                ctx.fillStyle = `rgba(255, 255, 255, ${starAlpha * 0.8})`;
+                let startX = Math.floor(camera.x / 1000) * 1000;
+                for (let x = startX - 1000; x < startX + width + 1000; x += 150) {
+                    let starX = x + (camera.x * 0.8) % 150; 
+                    ctx.fillRect(starX, 100 + (x%200), 3, 3);
+                    ctx.fillRect(starX + 50, 200 + (x%150), 2, 2);
+                }
+            }
+
             ctx.save();
             
             let shakeX = (Math.random() - 0.5) * camera.shake;
@@ -1149,6 +1445,7 @@
             for (let plat of platforms) plat.draw();
             for (let c of coins) c.draw();
             for (let p of projectiles) p.draw();
+            for (let p of powerups) p.draw();
             if (gameBoss.active) gameBoss.draw();
             
             if (gameState === 'PLAYING') player.draw();
@@ -1169,8 +1466,81 @@
             }
         }
 
-        // --- INISIALISASI ---
+        // --- INISIALISASI & SHOP LOGIC ---
         startBtn.addEventListener('click', startGame);
+        
+        const shopBtn = document.getElementById('shop-btn');
+        const shopModal = document.getElementById('shop-modal');
+        const closeShopBtn = document.getElementById('close-shop-btn');
+        const shopContainer = document.getElementById('shop-container');
+
+        const skinsAvailable = [
+            { id: '#FF5722', name: 'Oranye', cost: 0 },
+            { id: '#2196F3', name: 'Biru', cost: 100 },
+            { id: '#E91E63', name: 'Pink', cost: 200 },
+            { id: '#9C27B0', name: 'Ungu', cost: 300 },
+            { id: '#00E676', name: 'Neon', cost: 500 },
+            { id: '#FFEB3B', name: 'Emas', cost: 1000 }
+        ];
+
+        function renderShop() {
+            document.getElementById('shop-coins').innerText = gameData.totalCoins;
+            shopContainer.innerHTML = '';
+            
+            skinsAvailable.forEach(skin => {
+                let div = document.createElement('div');
+                div.className = 'shop-item';
+                
+                let isOwned = gameData.skins.includes(skin.id);
+                let isEquipped = gameData.equippedSkin === skin.id;
+                
+                if (isOwned) div.classList.add('owned');
+                if (isEquipped) div.classList.add('equipped');
+
+                div.innerHTML = `
+                    <div class="skin-preview" style="background-color: ${skin.id}"></div>
+                    <div style="font-size:12px; font-weight:bold;">${skin.name}</div>
+                    <div style="font-size:12px;">${isOwned ? (isEquipped ? 'Dipakai' : 'Milikmu') : '🪙 ' + skin.cost}</div>
+                `;
+
+                div.onclick = () => {
+                    if (isOwned) {
+                        gameData.equippedSkin = skin.id;
+                        player.color = skin.id;
+                        saveData();
+                        renderShop();
+                    } else if (gameData.totalCoins >= skin.cost) {
+                        gameData.totalCoins -= skin.cost;
+                        gameData.skins.push(skin.id);
+                        gameData.equippedSkin = skin.id;
+                        player.color = skin.id;
+                        saveData();
+                        renderShop();
+                        updateMenuStats();
+                        playSound('coin');
+                    } else {
+                        let coinText = document.getElementById('shop-coins');
+                        coinText.style.color = 'red';
+                        setTimeout(() => coinText.style.color = '#b8860b', 500);
+                    }
+                };
+
+                shopContainer.appendChild(div);
+            });
+        }
+
+        shopBtn.addEventListener('click', () => {
+            document.getElementById('message-box').style.display = 'none';
+            shopModal.style.display = 'flex';
+            renderShop();
+        });
+
+        closeShopBtn.addEventListener('click', () => {
+            shopModal.style.display = 'none';
+            document.getElementById('message-box').style.display = 'block';
+        });
+
+        loadData(); // Load save data awal
         
         camera.x = 0; camera.y = 0;
         platforms.push(new Platform(0, height - 100, width, 200));
