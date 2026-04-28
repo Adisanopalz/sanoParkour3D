@@ -260,6 +260,19 @@
             border: 2px solid #fff; transition: transform 0.1s; backdrop-filter: blur(4px);
         }
         #pause-btn:active { transform: scale(0.9); }
+        
+        #audio-controls {
+            position: absolute; top: 20px; right: 80px;
+            display: flex; gap: 10px; z-index: 15;
+        }
+        .audio-btn {
+            background: rgba(0,0,0,0.6); color: white; border-radius: 50%;
+            width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;
+            border: 2px solid #fff; transition: transform 0.1s; backdrop-filter: blur(4px);
+            font-size: 20px; cursor: pointer;
+        }
+        .audio-btn:active { transform: scale(0.9); }
+
         #pause-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
@@ -281,7 +294,11 @@
         <div id="boss-name">BOSS: OMEGA EYE</div>
     </div>
 
-    <div id="pause-btn">⏸️</div>
+    <div id="audio-controls">
+        <div class="audio-btn" id="bgm-btn" title="Matikan/Nyalakan Musik">🎵</div>
+        <div class="audio-btn" id="sfx-btn" title="Matikan/Nyalakan SFX">🔊</div>
+    </div>
+    <div id="pause-btn" title="Pause Game">⏸️</div>
 
     <div id="pause-overlay" class="hidden">
         <h1 style="text-shadow: none;">GAME DIJEDA</h1>
@@ -374,11 +391,18 @@
             document.getElementById('shop-coins').innerText = gameData.totalCoins;
         }
 
-        // --- SISTEM AUDIO BASS-BOOSTED ---
+        // --- SISTEM AUDIO BASS-BOOSTED & MUSIK ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
+        
+        let isSfxOn = true;
+        let isBgmOn = true;
+        let bgmInterval;
+        let nextBgmTime = 0;
+        let bgmStep = 0;
 
         function playSound(type) {
+            if (!isSfxOn) return;
             if (!audioCtx) audioCtx = new AudioContext();
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -422,6 +446,68 @@
                 gainNode.gain.setValueAtTime(0.5, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 1.0);
                 osc.start(); osc.stop(t + 1.0);
             }
+        }
+
+        // --- BGM ENGINE (Procedural Synthwave Beat) ---
+        function bgmLoop() {
+            if (!isBgmOn || gameState !== 'PLAYING' || isPaused) {
+                bgmInterval = requestAnimationFrame(bgmLoop);
+                return;
+            }
+            
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') return; 
+            
+            // Auto catch-up jika tab background
+            if (nextBgmTime < audioCtx.currentTime) nextBgmTime = audioCtx.currentTime + 0.05;
+
+            while (nextBgmTime < audioCtx.currentTime + 0.1) {
+                let t = nextBgmTime;
+                let isIntense = gameBoss.active; // Musik berubah saat boss muncul!
+                
+                // Bass Drum (Kick)
+                if (bgmStep % 4 === 0) {
+                    let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                    osc.connect(g); g.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(20, t+0.1);
+                    g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.1);
+                    osc.start(t); osc.stop(t+0.1);
+                }
+                
+                // Snare / Clap
+                if (bgmStep % 8 === 4) {
+                    let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                    osc.type = 'triangle'; osc.connect(g); g.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(300, t);
+                    g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.15);
+                    osc.start(t); osc.stop(t+0.15);
+                }
+                
+                // Hi-hat
+                if (bgmStep % 2 === 0 || (isIntense && bgmStep % 2 !== 0)) {
+                    let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                    osc.type = 'square'; osc.connect(g); g.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(8000, t);
+                    g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.05);
+                    osc.start(t); osc.stop(t+0.05);
+                }
+
+                // Synth Bass Line
+                let bassFreqs = [55, 0, 55, 65, 55, 0, 49, 0, 55, 0, 55, 73, 55, 0, 49, 0];
+                if (bassFreqs[bgmStep] > 0) {
+                    let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                    osc.type = 'sawtooth'; osc.connect(g); g.connect(audioCtx.destination);
+                    let freq = bassFreqs[bgmStep] * (isIntense ? 1.5 : 1); // Pitch naik pas boss
+                    osc.frequency.setValueAtTime(freq, t);
+                    g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.15);
+                    osc.start(t); osc.stop(t+0.15);
+                }
+                
+                bgmStep = (bgmStep + 1) % 16;
+                nextBgmTime += isIntense ? 0.12 : 0.14; // Tempo lebih cepat kalau ada boss!
+            }
+            
+            bgmInterval = requestAnimationFrame(bgmLoop);
         }
 
         // --- VARIABEL GLOBAL FULL IMPACT ---
@@ -1075,6 +1161,8 @@
             camera.x = 0; camera.y = 0; camera.shake = 0; levelEnd = 0; nextBossDistance = 2500;
             hitStopTimer = 0; screenFlash = 0;
             
+            nextBgmTime = audioCtx.currentTime + 0.1; bgmStep = 0; // Reset music timer
+            
             uiLayer.classList.add('hidden'); comboDisplay.style.opacity = '0';
             generateWorld(); lastTime = performance.now();
             animationFrameId = requestAnimationFrame(gameLoop);
@@ -1283,6 +1371,22 @@
         pauseBtn.addEventListener('click', togglePause); resumeBtn.addEventListener('click', togglePause);
         startBtn.addEventListener('click', startGame);
         
+        // --- AUDIO CONTROLS LOGIC ---
+        const bgmBtn = document.getElementById('bgm-btn');
+        const sfxBtn = document.getElementById('sfx-btn');
+        
+        bgmBtn.addEventListener('click', () => {
+            isBgmOn = !isBgmOn;
+            bgmBtn.innerText = isBgmOn ? '🎵' : '🔇';
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        });
+        
+        sfxBtn.addEventListener('click', () => {
+            isSfxOn = !isSfxOn;
+            sfxBtn.innerText = isSfxOn ? '🔊' : '🔕';
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        });
+        
         // --- SHOP LOGIC ---
         const shopBtn = document.getElementById('shop-btn'), shopModal = document.getElementById('shop-modal'), closeShopBtn = document.getElementById('close-shop-btn'), shopContainer = document.getElementById('shop-container');
 
@@ -1321,6 +1425,7 @@
         shopBtn.addEventListener('click', () => { document.getElementById('message-box').style.display = 'none'; shopModal.style.display = 'flex'; renderShop(); });
         closeShopBtn.addEventListener('click', () => { shopModal.style.display = 'none'; document.getElementById('message-box').style.display = 'block'; });
 
+        bgmLoop(); // Mulai loop engine (akan idle sampai isBgmOn & PLAYING)
         loadData(); camera.x = 0; camera.y = 0; platforms.push(new Platform(0, height - 100, width, 200)); draw();
 
     </script>
