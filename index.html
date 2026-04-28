@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Parkour Dash & Boss Fight - Edisi Mega</title>
+    <title>Parkour Dash & Boss Fight - 100% Impact</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap');
 
@@ -16,7 +16,7 @@
         }
 
         body {
-            background-color: #87CEEB; 
+            background-color: #000; /* Dasar hitam untuk screen flash */
             color: #333;
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
@@ -68,11 +68,12 @@
         }
 
         #combo-display {
-            font-size: 20px;
+            font-size: 24px;
             color: #FFEB3B;
-            text-shadow: 2px 2px 0px #FF5722;
+            text-shadow: 3px 3px 0px #FF5722;
             transition: transform 0.1s;
             opacity: 0;
+            font-style: italic;
         }
 
         /* Boss HP Bar */
@@ -81,11 +82,11 @@
             top: 20px; left: 50%;
             transform: translateX(-50%);
             width: 400px; height: 35px;
-            background: #222;
+            background: #111;
             border: 3px solid #fff;
             border-radius: 20px;
             display: none; 
-            box-shadow: 0 0 20px rgba(255, 0, 68, 0.5);
+            box-shadow: 0 0 25px rgba(255, 0, 68, 0.8);
             overflow: hidden;
             z-index: 5;
         }
@@ -93,7 +94,7 @@
         #boss-hp-bar {
             width: 100%; height: 100%;
             background: linear-gradient(90deg, #FF0044, #FF5722);
-            transition: width 0.2s ease;
+            transition: width 0.1s ease;
         }
 
         #boss-name {
@@ -109,11 +110,11 @@
         }
 
         #message-box {
-            background: rgba(20, 25, 30, 0.95);
+            background: rgba(15, 20, 25, 0.95);
             padding: 40px;
             border-radius: 20px;
-            border: 2px solid #4CAF50;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 20px rgba(76, 175, 80, 0.3) inset;
+            border: 2px solid #00E676;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 25px rgba(0, 230, 118, 0.4) inset;
             text-align: center;
             pointer-events: auto;
             color: white;
@@ -127,7 +128,8 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
-            filter: drop-shadow(3px 3px 0px #333);
+            filter: drop-shadow(4px 4px 0px #222);
+            font-style: italic;
         }
 
         p {
@@ -140,30 +142,31 @@
         .controls-info span {
             color: #FFEB3B;
             font-weight: bold;
-            background: #333;
+            background: #222;
             padding: 3px 8px;
             border-radius: 6px;
-            border: 1px solid #555;
+            border: 1px solid #444;
         }
 
         button {
             background: linear-gradient(45deg, #FF5722, #F44336);
             color: #fff;
             font-family: 'Poppins', sans-serif;
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 900;
             padding: 15px 45px;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #BF360C, 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 0px #BF360C, 0 10px 20px rgba(0,0,0,0.5);
             transition: all 0.1s;
             text-transform: uppercase;
+            font-style: italic;
         }
 
         button:active {
             transform: translateY(6px);
-            box-shadow: 0 0px 0px #BF360C, 0 5px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 0px 0px #BF360C, 0 5px 10px rgba(0,0,0,0.5);
         }
 
         .btn-group {
@@ -174,10 +177,10 @@
 
         #shop-btn {
             background: linear-gradient(45deg, #4CAF50, #009688);
-            box-shadow: 0 6px 0px #1B5E20, 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 0px #1B5E20, 0 10px 20px rgba(0,0,0,0.5);
         }
         #shop-btn:active {
-            box-shadow: 0 0px 0px #1B5E20, 0 5px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 0px 0px #1B5E20, 0 5px 10px rgba(0,0,0,0.5);
         }
 
         /* Shop Styles */
@@ -187,7 +190,7 @@
             padding: 30px;
             border-radius: 20px;
             border: 2px solid #FFEB3B;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             text-align: center;
             display: none;
             flex-direction: column;
@@ -219,14 +222,14 @@
         }
         .shop-item:hover { transform: scale(1.05); background: #343C44; }
         .shop-item.owned { border-color: #4CAF50; }
-        .shop-item.equipped { border-color: #FFEB3B; background: rgba(255, 235, 59, 0.1); box-shadow: 0 0 10px rgba(255,235,59,0.3); }
+        .shop-item.equipped { border-color: #FFEB3B; background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 15px rgba(255,235,59,0.4); }
 
         .skin-preview {
             width: 45px; height: 45px;
             margin: 0 auto 10px auto;
             border-radius: 8px;
             border: 2px solid #fff;
-            box-shadow: inset 0 -10px 10px rgba(0,0,0,0.3);
+            box-shadow: inset 0 -10px 10px rgba(0,0,0,0.4);
         }
 
         /* Mobile Controls */
@@ -238,28 +241,28 @@
         .control-group { display: flex; gap: 10px; pointer-events: auto; }
         .btn-mobile {
             width: 70px; height: 70px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4); border: 3px solid #fff;
-            color: #333; font-size: 24px; font-weight: bold;
+            background: rgba(255, 255, 255, 0.3); border: 3px solid #fff;
+            color: #fff; font-size: 26px; font-weight: bold; text-shadow: 1px 1px 2px #000;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px);
             -webkit-tap-highlight-color: transparent;
         }
-        .btn-mobile:active { background: rgba(255, 255, 255, 0.8); transform: translateY(5px); box-shadow: 0 0px 0px rgba(0,0,0,0.3); }
-        .btn-action { background: rgba(255, 87, 34, 0.8); color: #fff; border-color: #FFCCBC; }
+        .btn-mobile:active { background: rgba(255, 255, 255, 0.9); transform: translateY(5px); box-shadow: 0 0px 0px rgba(0,0,0,0.5); color: #000; text-shadow: none; }
+        .btn-action { background: rgba(255, 87, 34, 0.8); border-color: #FFCCBC; }
         .btn-action:active { background: rgba(255, 87, 34, 1); }
 
         /* UI Tambahan */
         #pause-btn {
             position: absolute; top: 20px; right: 20px;
             font-size: 24px; cursor: pointer; z-index: 15;
-            background: rgba(0,0,0,0.5); color: white; border-radius: 50%;
+            background: rgba(0,0,0,0.6); color: white; border-radius: 50%;
             width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;
             border: 2px solid #fff; transition: transform 0.1s; backdrop-filter: blur(4px);
         }
         #pause-btn:active { transform: scale(0.9); }
         #pause-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 25; backdrop-filter: blur(5px);
         }
         .hidden { display: none !important; }
@@ -270,7 +273,7 @@
     <div id="hud">
         <div class="hud-item">Jarak: <span id="score">0</span>m</div>
         <div class="hud-item"><div class="coin-icon"></div> <span id="coin-score">0</span></div>
-        <div id="combo-display">Combo x<span id="combo-multiplier">1</span> 🔥</div>
+        <div id="combo-display">COMBO x<span id="combo-multiplier">1</span> 🔥</div>
     </div>
 
     <div id="boss-hp-container">
@@ -288,15 +291,15 @@
     <div id="ui-layer">
         <div id="message-box">
             <h1 id="game-title">Parkour Dash</h1>
-            <div id="menu-stats" style="margin-bottom: 20px; font-size: 18px; color: #4CAF50; font-weight: bold;">
+            <div id="menu-stats" style="margin-bottom: 20px; font-size: 18px; color: #00E676; font-weight: bold;">
                 Jarak Max: <span id="high-score-display">0</span>m | Total 🪙: <span id="total-coins-display">0</span>
             </div>
             <p id="game-desc" class="controls-info">
                 <span>WASD/Panah</span> Gerak | <span>Spasi</span> Lompat | <span>Shift</span> Dash<br><br>
-                ⚔️ <b>CARA MELAWAN BOSS:</b><br>
-                1. <span>DASH</span> menembus tubuh boss.<br>
-                2. <span>DASH</span> pada peluru laser untuk <b>Tangkis (Parry)</b>.<br>
-                3. Lompat & tekan <span>BAWAH (S)</span> untuk <b>Ground Pound</b> kepala Boss!
+                💥 <b>FULL IMPACT MECHANICS:</b><br>
+                1. <span>DASH</span> menembus laser boss untuk <b>PARRY (Tangkis)</b>.<br>
+                2. Lompat & tekan <span>BAWAH (S)</span> untuk <b>GROUND POUND!</b><br>
+                (Menghasilkan gelombang kejut & damage masif ke boss)
             </p>
             <div class="btn-group">
                 <button id="start-btn">Mulai</button>
@@ -305,10 +308,10 @@
         </div>
 
         <div id="shop-modal">
-            <h2>TOKO SKIN EKSKLUSIF</h2>
-            <div style="font-weight:bold; color:#FFEB3B; font-size: 20px;">🪙 <span id="shop-coins">0</span></div>
+            <h2 style="font-style: italic;">TOKO SKIN EKSKLUSIF</h2>
+            <div style="font-weight:bold; color:#FFEB3B; font-size: 24px;">🪙 <span id="shop-coins">0</span></div>
             <div class="shop-items" id="shop-container"></div>
-            <button id="close-shop-btn" style="background:#555; box-shadow: 0 4px 0px #333; font-size:16px; padding:10px 20px; margin-top: 10px;">Tutup Toko</button>
+            <button id="close-shop-btn" style="background:#555; box-shadow: 0 4px 0px #333; font-size:18px; padding:10px 20px; margin-top: 10px;">Tutup Toko</button>
         </div>
     </div>
 
@@ -318,7 +321,7 @@
             <div class="btn-mobile" id="btn-right">▶</div>
         </div>
         <div class="control-group">
-            <div class="btn-mobile" id="btn-down" style="font-size: 18px;">Banting</div>
+            <div class="btn-mobile" id="btn-down" style="font-size: 28px;">⏬</div>
             <div class="btn-mobile btn-action" id="btn-dash">⚡</div>
             <div class="btn-mobile btn-action" id="btn-jump">▲</div>
         </div>
@@ -356,28 +359,22 @@
         resize();
 
         // --- SISTEM SAVE LOKAL ---
-        let gameData = {
-            totalCoins: 0, highScore: 0,
-            skins: ['#FF5722'], equippedSkin: '#FF5722'
-        };
+        let gameData = { totalCoins: 0, highScore: 0, skins: ['#FF5722'], equippedSkin: '#FF5722' };
 
         function loadData() {
-            let saved = localStorage.getItem('parkourDashSaveDataV3');
+            let saved = localStorage.getItem('parkourDashSaveDataV4');
             if (saved) gameData = JSON.parse(saved);
             updateMenuStats();
         }
 
-        function saveData() {
-            localStorage.setItem('parkourDashSaveDataV3', JSON.stringify(gameData));
-        }
-
+        function saveData() { localStorage.setItem('parkourDashSaveDataV4', JSON.stringify(gameData)); }
         function updateMenuStats() {
             document.getElementById('high-score-display').innerText = Math.floor(gameData.highScore);
             document.getElementById('total-coins-display').innerText = gameData.totalCoins;
             document.getElementById('shop-coins').innerText = gameData.totalCoins;
         }
 
-        // --- SISTEM AUDIO ---
+        // --- SISTEM AUDIO BASS-BOOSTED ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
 
@@ -392,43 +389,52 @@
             let t = audioCtx.currentTime;
             if (type === 'jump') {
                 osc.type = 'square'; osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(300, t + 0.1);
-                gainNode.gain.setValueAtTime(0.05, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                gainNode.gain.setValueAtTime(0.08, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
                 osc.start(); osc.stop(t + 0.1);
             } else if (type === 'dash') {
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, t); osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
-                gainNode.gain.setValueAtTime(0.05, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                gainNode.gain.setValueAtTime(0.08, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
                 osc.start(); osc.stop(t + 0.2);
             } else if (type === 'coin') {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); osc.frequency.setValueAtTime(1200, t + 0.05);
-                gainNode.gain.setValueAtTime(0.05, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                gainNode.gain.setValueAtTime(0.08, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
                 osc.start(); osc.stop(t + 0.1);
             } else if (type === 'hit') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(20, t + 0.3);
-                gainNode.gain.setValueAtTime(0.1, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, t); osc.frequency.exponentialRampToValueAtTime(10, t + 0.3);
+                gainNode.gain.setValueAtTime(0.15, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
                 osc.start(); osc.stop(t + 0.3);
             } else if (type === 'powerup') {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(400, t); osc.frequency.linearRampToValueAtTime(800, t + 0.2);
-                gainNode.gain.setValueAtTime(0.05, t); gainNode.gain.linearRampToValueAtTime(0.01, t + 0.2);
+                gainNode.gain.setValueAtTime(0.08, t); gainNode.gain.linearRampToValueAtTime(0.01, t + 0.2);
                 osc.start(); osc.stop(t + 0.2);
             } else if (type === 'star') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(400, t); osc.frequency.setValueAtTime(600, t+0.1); osc.frequency.setValueAtTime(800, t+0.2); osc.frequency.setValueAtTime(1000, t+0.3);
-                gainNode.gain.setValueAtTime(0.08, t); gainNode.gain.linearRampToValueAtTime(0.01, t + 0.4);
-                osc.start(); osc.stop(t + 0.4);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, t); osc.frequency.setValueAtTime(800, t+0.1); osc.frequency.setValueAtTime(1200, t+0.2); 
+                gainNode.gain.setValueAtTime(0.1, t); gainNode.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(); osc.stop(t + 0.3);
             } else if (type === 'smash') {
-                // Suara dentuman banting badan
-                osc.type = 'square'; osc.frequency.setValueAtTime(100, t); osc.frequency.exponentialRampToValueAtTime(10, t + 0.4);
-                gainNode.gain.setValueAtTime(0.15, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
-                osc.start(); osc.stop(t + 0.4);
+                // MEGA BASS untuk Ground Pound
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, t); osc.frequency.exponentialRampToValueAtTime(5, t + 0.6);
+                gainNode.gain.setValueAtTime(0.4, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+                osc.start(); osc.stop(t + 0.6);
+            } else if (type === 'boss_die') {
+                // Ledakan Boss Ekstrim
+                osc.type = 'square'; osc.frequency.setValueAtTime(80, t); osc.frequency.exponentialRampToValueAtTime(1, t + 1.0);
+                gainNode.gain.setValueAtTime(0.5, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 1.0);
+                osc.start(); osc.stop(t + 1.0);
             }
         }
 
-        // --- VARIABEL GLOBAL ---
+        // --- VARIABEL GLOBAL FULL IMPACT ---
         let gameState = 'START'; 
         let currentDistance = 0, mainScore = 0, coinsCollected = 0;
         let comboMultiplier = 1, comboTimer = 0;
         let camera = { x: 0, y: 0, shake: 0 };
         let lastTime = 0, globalTime = 0;
         let animationFrameId, isPaused = false;
+        
+        // IMPACT VARIABLES
+        let hitStopTimer = 0;   // Waktu berhenti sejenak
+        let screenFlash = 0;    // Tingkat kilatan putih layar
         
         let isRaining = false, rainIntensity = 0;
 
@@ -462,12 +468,25 @@
         bindTouchBtn('btn-right', 'right'); bindTouchBtn('btn-left', 'left'); bindTouchBtn('btn-down', 'down');
         bindTouchBtn('btn-jump', 'jump', 'jump'); bindTouchBtn('btn-dash', 'dash', 'dash');
 
-        // Fungsi Cek Tabrakan Universal
         function checkRectCollision(r1, r2) {
             return r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y;
         }
 
         // --- ENTITAS ---
+
+        class Shockwave {
+            constructor(x, y, color, speed = 800) {
+                this.x = x; this.y = y; this.r = 10; this.color = color; this.life = 1.0; this.speed = speed;
+            }
+            update(dt) { this.r += this.speed * dt; this.life -= dt * 2.5; }
+            draw() {
+                if (this.life <= 0) return;
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.life);
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.lineWidth = 8 * this.life; ctx.strokeStyle = this.color; ctx.stroke();
+                ctx.restore();
+            }
+        }
 
         class Coin {
             constructor(x, y) {
@@ -479,23 +498,23 @@
                 if (player.hasMagnet && !this.collected) {
                     let dx = (player.x + player.w/2) - (this.x + 10), dy = (player.y + player.h/2) - (this.y + 10);
                     let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < 350) { this.x += (dx/dist) * 700 * dt; this.baseY += (dy/dist) * 700 * dt; }
+                    if (dist < 400) { this.x += (dx/dist) * 800 * dt; this.baseY += (dy/dist) * 800 * dt; }
                 }
                 if (!this.collected && checkRectCollision(player, this)) {
                     this.collected = true; coinsCollected++;
-                    comboMultiplier++; comboTimer = 2.5; mainScore += 10 * comboMultiplier;
+                    comboMultiplier++; comboTimer = 3.0; mainScore += 10 * comboMultiplier;
                     coinScoreElement.innerText = coinsCollected; playSound('coin');
-                    createParticles(this.x + 10, this.y + 10, 8, 'gold', 3);
-                    coinScoreElement.style.transform = "scale(1.5)"; comboDisplay.style.transform = "scale(1.3)";
+                    createParticles(this.x + 10, this.y + 10, 10, 'gold', 4);
+                    coinScoreElement.style.transform = "scale(1.5)"; comboDisplay.style.transform = "scale(1.4)";
                     setTimeout(() => { coinScoreElement.style.transform = "scale(1)"; comboDisplay.style.transform = "scale(1)"; }, 100);
                 }
             }
             draw() {
                 if (this.collected) return;
-                ctx.save(); ctx.translate(this.x + 10, this.y + 10); ctx.scale(Math.cos(globalTime * 4 + this.timeOffset), 1);
-                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fillStyle = 'gold'; ctx.fill();
+                ctx.save(); ctx.translate(this.x + 10, this.y + 10); ctx.scale(Math.cos(globalTime * 5 + this.timeOffset), 1);
+                ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fillStyle = 'gold'; ctx.fill();
                 ctx.lineWidth = 2; ctx.strokeStyle = '#b8860b'; ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(0, 6); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(0, 7); ctx.stroke();
                 ctx.restore();
             }
         }
@@ -520,20 +539,20 @@
             }
             update(dt) {
                 this.timer += dt;
-                if (!this.active && this.timer > 2.0) { this.active = true; this.timer = 0; playSound('hit'); }
+                if (!this.active && this.timer > 2.0) { this.active = true; this.timer = 0; playSound('hit'); camera.shake = 2; }
                 else if (this.active && this.timer > 1.5) { this.active = false; this.timer = 0; }
                 if (!this.active && this.timer > 1.5 && Math.random() > 0.5) {
-                    particles.push(new Particle(this.x+5, this.y + Math.random()*this.h, 0, 0, 'rgba(255,0,0,0.5)', 0.2));
+                    particles.push(new Particle(this.x+5, this.y + Math.random()*this.h, 0, 0, 'rgba(255,0,0,0.8)', 0.5));
                 }
             }
             draw() {
                 ctx.save();
-                ctx.fillStyle = '#222'; ctx.fillRect(this.x - 5, this.y + this.h - 10, 20, 10); ctx.fillRect(this.x - 5, this.y, 20, 10);
+                ctx.fillStyle = '#222'; ctx.fillRect(this.x - 8, this.y + this.h - 10, 26, 10); ctx.fillRect(this.x - 8, this.y, 26, 10);
                 if (this.active) {
-                    ctx.shadowBlur = 15; ctx.shadowColor = '#FF0044'; ctx.fillStyle = '#FF0044'; ctx.fillRect(this.x, this.y + 10, this.w, this.h - 20);
+                    ctx.shadowBlur = 20; ctx.shadowColor = '#FF0044'; ctx.fillStyle = '#FF0044'; ctx.fillRect(this.x, this.y + 10, this.w, this.h - 20);
                     ctx.fillStyle = '#fff'; ctx.fillRect(this.x + 3, this.y + 10, this.w - 6, this.h - 20);
                 } else if (this.timer > 1.5) {
-                    ctx.fillStyle = `rgba(255, 0, 68, ${Math.sin(this.timer*30)*0.5 + 0.5})`; ctx.fillRect(this.x+4, this.y + 10, 2, this.h - 20);
+                    ctx.fillStyle = `rgba(255, 0, 68, ${Math.sin(this.timer*40)*0.5 + 0.5})`; ctx.fillRect(this.x+4, this.y + 10, 2, this.h - 20);
                 }
                 ctx.restore();
             }
@@ -541,10 +560,10 @@
 
         class Particle {
             constructor(x, y, vx, vy, color, life) {
-                this.x = x; this.y = y; this.vx = vx + (Math.random() - 0.5) * 100; this.vy = vy + (Math.random() - 0.5) * 100;
-                this.color = color; this.life = life; this.maxLife = life; this.size = Math.random() * 5 + 3;
+                this.x = x; this.y = y; this.vx = vx + (Math.random() - 0.5) * 200; this.vy = vy + (Math.random() - 0.5) * 200;
+                this.color = color; this.life = life; this.maxLife = life; this.size = Math.random() * 6 + 4;
             }
-            update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; this.vy += 400 * dt; this.life -= dt; this.size *= 0.92; }
+            update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; this.vy += 500 * dt; this.life -= dt; this.size *= 0.90; }
             draw() {
                 ctx.save(); ctx.globalAlpha = Math.max(0, this.life / this.maxLife); ctx.fillStyle = this.color;
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
@@ -553,7 +572,7 @@
 
         class PowerUp {
             constructor(x, y, type) {
-                this.x = x; this.baseY = y; this.y = y; this.w = 25; this.h = 25;
+                this.x = x; this.baseY = y; this.y = y; this.w = 30; this.h = 30;
                 this.type = type; this.collected = false; this.timeOffset = Math.random() * Math.PI * 2;
             }
             update(dt) {
@@ -562,9 +581,9 @@
                     this.collected = true;
                     if (this.type === 'star') playSound('star'); else playSound('powerup');
                     
-                    if (this.type === 'magnet') { player.hasMagnet = true; player.magnetTimer = 10; createParticles(this.x, this.y, 20, '#00BCD4', 4); }
-                    else if (this.type === 'shield') { player.hasShield = true; createParticles(this.x, this.y, 20, '#4CAF50', 4); }
-                    else if (this.type === 'star') { player.isInvincible = true; player.invincibilityTimer = 8; createParticles(this.x, this.y, 30, '#FFEB3B', 6); camera.shake = 5; }
+                    if (this.type === 'magnet') { player.hasMagnet = true; player.magnetTimer = 12; createParticles(this.x, this.y, 25, '#00BCD4', 5); shockwaves.push(new Shockwave(this.x, this.y, '#00BCD4', 400)); }
+                    else if (this.type === 'shield') { player.hasShield = true; createParticles(this.x, this.y, 25, '#4CAF50', 5); shockwaves.push(new Shockwave(this.x, this.y, '#4CAF50', 400)); }
+                    else if (this.type === 'star') { player.isInvincible = true; player.invincibilityTimer = 10; createParticles(this.x, this.y, 40, '#FFEB3B', 8); camera.shake = 10; screenFlash = 0.5; shockwaves.push(new Shockwave(this.x, this.y, '#FFEB3B', 600)); }
                 }
             }
             draw() {
@@ -573,12 +592,13 @@
                 let color = this.type === 'magnet' ? '#00BCD4' : (this.type === 'shield' ? '#4CAF50' : '#FFEB3B');
                 
                 if (this.type === 'star') {
-                    ctx.shadowBlur = 10; ctx.shadowColor = color; ctx.fillStyle = color; ctx.beginPath();
-                    for(let i=0; i<5; i++) { ctx.lineTo(Math.cos((18+i*72)*Math.PI/180)*15, -Math.sin((18+i*72)*Math.PI/180)*15); ctx.lineTo(Math.cos((54+i*72)*Math.PI/180)*6, -Math.sin((54+i*72)*Math.PI/180)*6); }
+                    ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.fillStyle = color; ctx.beginPath();
+                    for(let i=0; i<5; i++) { ctx.lineTo(Math.cos((18+i*72)*Math.PI/180)*18, -Math.sin((18+i*72)*Math.PI/180)*18); ctx.lineTo(Math.cos((54+i*72)*Math.PI/180)*8, -Math.sin((54+i*72)*Math.PI/180)*8); }
                     ctx.closePath(); ctx.fill();
                 } else {
+                    ctx.shadowBlur = 10; ctx.shadowColor = color;
                     ctx.fillStyle = color; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-                    ctx.fillStyle = '#fff'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.rotate(-globalTime * 2); ctx.fillText(this.type === 'magnet' ? 'M' : 'S', 0, 0);
                 }
                 ctx.restore();
@@ -591,7 +611,8 @@
                 this.y = this.baseY + Math.sin(globalTime * 5 + this.timeOffset) * 15;
                 if (!this.collected && checkRectCollision(player, this)) {
                     this.collected = true; player.canDash = true; player.dashCooldown = 0; playSound('powerup');
-                    createParticles(this.x + 10, this.y + 10, 15, '#00FFFF', 4); camera.shake = 3;
+                    createParticles(this.x + 10, this.y + 10, 20, '#00FFFF', 5); camera.shake = 5; screenFlash = 0.2;
+                    shockwaves.push(new Shockwave(this.x+10, this.y+10, '#00FFFF', 500));
                 }
             }
             draw() {
@@ -599,8 +620,8 @@
                 ctx.save(); ctx.translate(this.x + 10, this.y + 10);
                 let scale = 1 + Math.sin(globalTime * 10) * 0.2; ctx.scale(scale, scale);
                 ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fillStyle = '#00FFFF'; ctx.fill();
-                ctx.shadowBlur = 10; ctx.shadowColor = '#00FFFF'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00FFFF'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
             }
         }
 
@@ -609,13 +630,14 @@
             update(dt) {
                 if (this.bounceAnim > 0) this.bounceAnim -= dt * 10; else this.bounceAnim = 0;
                 if (player.vy > 0 && player.x < this.x + this.w && player.x + player.w > this.x && player.y + player.h >= this.y && player.y + player.h <= this.y + this.h + 30) {
-                    player.vy = -1400; player.y = this.y - player.h; player.isGrounded = false; player.jumpsLeft = 2; player.canDash = true;
-                    this.bounceAnim = 1; playSound('jump'); createParticles(this.x + this.w/2, this.y, 20, '#FFEB3B', 5);
-                    if (player.isSmashing) player.isSmashing = false; // Reset smash
+                    player.vy = -1600; player.y = this.y - player.h; player.isGrounded = false; player.jumpsLeft = 2; player.canDash = true;
+                    this.bounceAnim = 1; playSound('jump'); createParticles(this.x + this.w/2, this.y, 30, '#FFEB3B', 7);
+                    if (player.isSmashing) player.isSmashing = false; 
+                    camera.shake = 8; shockwaves.push(new Shockwave(this.x+this.w/2, this.y, '#FFEB3B', 500));
                 }
             }
             draw() {
-                ctx.save(); ctx.translate(this.x, this.y + (this.bounceAnim * 10)); 
+                ctx.save(); ctx.translate(this.x, this.y + (this.bounceAnim * 15)); 
                 ctx.fillStyle = '#FFEB3B'; ctx.fillRect(0, 0, this.w, this.h); ctx.fillStyle = '#F57F17'; ctx.fillRect(0, 5, this.w, 5); ctx.restore();
             }
         }
@@ -623,18 +645,16 @@
         class Projectile {
             constructor(x, y, vx, vy) { 
                 this.x = x; this.y = y; this.vx = vx; this.vy = vy; 
-                this.r = 10; this.active = true; 
-                this.isDeflected = false; // Status untuk mekanik PARRY
-                this.w = this.r*2; this.h = this.r*2; // untuk hitbox fungsi rect
+                this.r = 12; this.active = true; 
+                this.isDeflected = false; 
+                this.w = this.r*2; this.h = this.r*2; 
             }
             update(dt) {
                 this.x += this.vx * dt; this.y += this.vy * dt;
                 
-                // Efek Jejak
                 let pColor = this.isDeflected ? '#00FFFF' : '#FF0044';
-                if (Math.random() > 0.3) particles.push(new Particle(this.x, this.y, -this.vx*0.2, -this.vy*0.2, pColor, 0.2));
+                if (Math.random() > 0.2) particles.push(new Particle(this.x, this.y, -this.vx*0.2, -this.vy*0.2, pColor, 0.3));
                 
-                // Deteksi Tabrakan
                 if (this.active) {
                     let hitPlayer = false;
                     let testX = Math.max(player.x, Math.min(this.x, player.x + player.w));
@@ -642,39 +662,40 @@
                     if (((this.x - testX)**2 + (this.y - testY)**2) < this.r**2) hitPlayer = true;
 
                     if (hitPlayer && !this.isDeflected) {
-                        // MECHANIC: PARRY (DASH KE PELURU)
+                        // HIT STOP & PARRY MECHANIC
                         if (player.isDashing || player.isInvincible) {
                             this.isDeflected = true;
                             playSound('dash');
-                            createParticles(this.x, this.y, 15, '#00FFFF', 5);
-                            camera.shake = 5;
-                            // Balikkan arah ke boss!
+                            createParticles(this.x, this.y, 25, '#00FFFF', 6);
+                            camera.shake = 15; screenFlash = 0.3; hitStopTimer = 0.05; // IMPACT!
+                            shockwaves.push(new Shockwave(this.x, this.y, '#00FFFF', 400));
+                            
                             let dx = (gameBoss.x + gameBoss.w/2) - this.x;
                             let dy = (gameBoss.y + gameBoss.h/2) - this.y;
                             let dist = Math.sqrt(dx*dx + dy*dy);
-                            this.vx = (dx/dist) * 900; // Peluru balik lebih cepat
-                            this.vy = (dy/dist) * 900;
-                            mainScore += 200; // Bonus skor parry
+                            this.vx = (dx/dist) * 1200; 
+                            this.vy = (dy/dist) * 1200;
+                            mainScore += 300; 
                         } else if (player.hasShield) {
-                            player.hasShield = false; this.active = false; playSound('hit'); createParticles(player.x+player.w/2, player.y+player.h/2, 20, '#4CAF50', 5);
+                            player.hasShield = false; this.active = false; playSound('hit'); createParticles(player.x+player.w/2, player.y+player.h/2, 30, '#4CAF50', 7);
+                            camera.shake = 10; screenFlash = 0.2;
                         } else {
                             gameOver("TERKENA LASER BOSS!"); this.active = false;
                         }
                     }
 
-                    // MECHANIC: SERANG BOSS DENGAN PELURU SENDIRI
                     if (this.isDeflected && gameBoss.active && checkRectCollision({x:this.x-this.r, y:this.y-this.r, w:this.w, h:this.h}, gameBoss)) {
-                        gameBoss.takeDamage(2); // Parry damage lebih besar (2x)
+                        gameBoss.takeDamage(2); 
                         this.active = false;
-                        createParticles(this.x, this.y, 25, '#00FFFF', 6);
-                        mainScore += 500;
+                        createParticles(this.x, this.y, 40, '#00FFFF', 8);
+                        mainScore += 800;
                     }
                 }
             }
             draw() {
                 if (!this.active) return;
                 let pColor = this.isDeflected ? '#00FFFF' : '#FF0044';
-                ctx.save(); ctx.fillStyle = pColor; ctx.shadowBlur=15; ctx.shadowColor=pColor; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill();
+                ctx.save(); ctx.fillStyle = pColor; ctx.shadowBlur=20; ctx.shadowColor=pColor; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#fff'; ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(this.x, this.y, this.r/2, 0, Math.PI*2); ctx.fill(); ctx.restore();
             }
         }
@@ -682,78 +703,82 @@
         class Boss {
             constructor() { this.reset(); }
             reset() {
-                this.active = false; this.x = 0; this.y = 0; this.w = 100; this.h = 100; 
-                this.maxHp = 15; // Ditingkatkan karena sekarang ada Parry dan Smash
+                this.active = false; this.x = 0; this.y = 0; this.w = 120; this.h = 120; 
+                this.maxHp = 18; 
                 this.hp = this.maxHp;
                 this.state = 'hidden'; this.shootTimer = 0; this.hoverOffset = 0;
             }
             spawn(startX, startY) {
                 this.active = true; this.x = startX + 500; this.y = startY - 200; this.hp = this.maxHp; this.state = 'entering';
-                bossHpContainer.style.display = 'block'; this.updateHpBar(); createParticles(this.x, this.y, 50, '#333', 10);
+                bossHpContainer.style.display = 'block'; this.updateHpBar(); createParticles(this.x, this.y, 60, '#333', 12);
             }
             updateHpBar() { bossHpBar.style.width = `${Math.max(0, (this.hp / this.maxHp) * 100)}%`; }
             takeDamage(amount = 1) {
                 this.hp -= amount; this.updateHpBar(); playSound('hit'); 
-                createParticles(this.x + this.w/2, this.y + this.h/2, 30*amount, '#FF0044', 8);
-                camera.shake = 10 + (amount*5); this.isFlashing = 0.15; 
-                if (this.hp <= 0) this.die(); else this.x += 80;
+                createParticles(this.x + this.w/2, this.y + this.h/2, 40*amount, '#FF0044', 10);
+                camera.shake = 15 + (amount*8); this.isFlashing = 0.2; 
+                hitStopTimer = 0.05 * amount; // IMPACT! Freeze frame based on damage
+                if (this.hp <= 0) this.die(); else this.x += 100;
             }
             die() {
-                this.state = 'dying'; bossHpContainer.style.display = 'none'; camera.shake = 40; playSound('hit');
-                createParticles(this.x + this.w/2, this.y + this.h/2, 150, '#FF5722', 20);
-                for(let i=0; i<30; i++) { let c = new Coin(this.x+this.w/2+(Math.random()*200-100), this.y+this.h/2+(Math.random()*200-100)); c.baseY = c.y; coins.push(c); }
-                setTimeout(() => { this.active = false; this.state = 'hidden'; }, 600); 
+                this.state = 'dying'; bossHpContainer.style.display = 'none'; camera.shake = 60; playSound('boss_die');
+                screenFlash = 1.0; hitStopTimer = 0.4; // SUPER IMPACT!
+                shockwaves.push(new Shockwave(this.x+this.w/2, this.y+this.h/2, '#FF5722', 1500));
+                createParticles(this.x + this.w/2, this.y + this.h/2, 200, '#FF5722', 25);
+                for(let i=0; i<40; i++) { let c = new Coin(this.x+this.w/2+(Math.random()*300-150), this.y+this.h/2+(Math.random()*300-150)); c.baseY = c.y; coins.push(c); }
+                setTimeout(() => { this.active = false; this.state = 'hidden'; }, 1000); 
             }
             update(dt) {
                 if (!this.active || this.state === 'dying') return;
                 if (this.isFlashing > 0) this.isFlashing -= dt;
-                this.hoverOffset += dt * 4; 
+                this.hoverOffset += dt * 5; 
                 
                 let isRage = this.hp <= this.maxHp / 2;
 
                 if (this.state === 'entering') {
                     let targetX = player.x + width/2.5; let targetY = player.y - 150;
-                    this.x += (targetX - this.x) * 2 * dt; this.y += (targetY - this.y) * 2 * dt;
+                    this.x += (targetX - this.x) * 3 * dt; this.y += (targetY - this.y) * 3 * dt;
                     if (Math.abs(this.x - targetX) < 50) this.state = 'fighting';
                 } else if (this.state === 'fighting') {
-                    let targetX = player.x + width/2.5; let targetY = player.y - 150 + Math.sin(this.hoverOffset) * 80;
-                    this.x += (targetX - this.x) * (isRage ? 4 : 2) * dt; this.y += (targetY - this.y) * 3 * dt;
+                    let targetX = player.x + width/2.5; let targetY = player.y - 150 + Math.sin(this.hoverOffset) * 100;
+                    this.x += (targetX - this.x) * (isRage ? 5 : 3) * dt; this.y += (targetY - this.y) * 4 * dt;
 
                     this.shootTimer -= dt;
                     if (this.shootTimer <= 0) {
-                        this.shootTimer = isRage ? 1.5 : 1.2; playSound('jump'); 
+                        this.shootTimer = isRage ? 1.3 : 1.1; playSound('jump'); camera.shake = 3;
                         let dx = (player.x + player.w/2) - (this.x + this.w/2), dy = (player.y + player.h/2) - (this.y + this.h/2);
                         let angle = Math.atan2(dy, dx);
-                        let speed = isRage ? 550 : 450;
+                        let speed = isRage ? 650 : 500;
                         
                         projectiles.push(new Projectile(this.x+this.w/2, this.y+this.h/2+20, Math.cos(angle)*speed, Math.sin(angle)*speed));
                         if (isRage) {
-                            projectiles.push(new Projectile(this.x+this.w/2, this.y+this.h/2+20, Math.cos(angle-0.3)*speed, Math.sin(angle-0.3)*speed));
-                            projectiles.push(new Projectile(this.x+this.w/2, this.y+this.h/2+20, Math.cos(angle+0.3)*speed, Math.sin(angle+0.3)*speed));
+                            projectiles.push(new Projectile(this.x+this.w/2, this.y+this.h/2+20, Math.cos(angle-0.35)*speed, Math.sin(angle-0.35)*speed));
+                            projectiles.push(new Projectile(this.x+this.w/2, this.y+this.h/2+20, Math.cos(angle+0.35)*speed, Math.sin(angle+0.35)*speed));
                         }
-                        this.x += 30; 
+                        this.x += 40; 
                     }
 
-                    // TABRAKAN PLAYER KE BOSS
                     if (checkRectCollision(player, this)) {
-                        // MECHANIC: GROUND POUND / SMASH (Kena dari atas)
-                        if (player.isSmashing && player.y + player.h < this.y + 40) {
-                            this.takeDamage(3); // Smash ngasih damage gila (3)
-                            player.vy = -1200;  // Mantul dari kepala
-                            player.isSmashing = false;
-                            player.isGrounded = false; player.jumpsLeft = 1; player.canDash = true; // reset moves
-                            mainScore += 1500;
-                            playSound('smash');
-                            createParticles(player.x+player.w/2, player.y+player.h, 40, '#fff', 10);
+                        if (player.isSmashing && player.y + player.h < this.y + 50) {
+                            this.takeDamage(4); // MEGA SMASH DAMAGE
+                            player.vy = -1500; 
+                            player.isSmashing = false; player.isGrounded = false; player.jumpsLeft = 1; player.canDash = true; 
+                            mainScore += 2000; playSound('smash');
+                            shockwaves.push(new Shockwave(this.x+this.w/2, this.y, '#fff', 800));
+                            createParticles(player.x+player.w/2, player.y+player.h, 60, '#fff', 15);
+                            hitStopTimer = 0.15; screenFlash = 0.8; // FULL IMPACT HIT STOP
                         }
-                        // MECHANIC: DASH THROUGH
                         else if (player.isDashing) {
                             this.takeDamage(1); 
-                            player.vx = -900; player.vy = -400; player.isDashing = false; mainScore += 1000; 
+                            player.vx = -1200; player.vy = -500; player.isDashing = false; mainScore += 1000; 
+                            hitStopTimer = 0.05; screenFlash = 0.3;
                         } 
-                        // KALO GAK NGAPANGAPAIN = MATI
                         else if (player.isInvincible) { /* Kebal */ }
-                        else if (player.hasShield) { player.hasShield = false; player.vx = -1200; player.vy = -600; playSound('hit'); createParticles(player.x+player.w/2, player.y+player.h/2, 20, '#4CAF50', 5); }
+                        else if (player.hasShield) { 
+                            player.hasShield = false; player.vx = -1500; player.vy = -800; playSound('hit'); 
+                            createParticles(player.x+player.w/2, player.y+player.h/2, 30, '#4CAF50', 8); 
+                            hitStopTimer = 0.05; screenFlash = 0.4;
+                        }
                         else { gameOver("DIMAKAN BOSS!"); }
                     }
                 }
@@ -761,37 +786,37 @@
             draw() {
                 if (!this.active || this.state === 'dying') return;
                 ctx.save(); ctx.translate(this.x + this.w/2, this.y + this.h/2); ctx.rotate(Math.sin(this.hoverOffset * 0.5) * 0.1);
-                ctx.fillStyle = this.isFlashing > 0 ? '#fff' : '#222';
-                ctx.beginPath(); ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 20); ctx.fill();
-                ctx.strokeStyle = this.hp <= this.maxHp/2 ? '#FF0044' : '#555'; ctx.lineWidth=4; ctx.stroke(); 
+                ctx.fillStyle = this.isFlashing > 0 ? '#fff' : '#111';
+                ctx.beginPath(); ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 25); ctx.fill();
+                ctx.strokeStyle = this.hp <= this.maxHp/2 ? '#FF0044' : '#444'; ctx.lineWidth=5; ctx.stroke(); 
 
-                ctx.fillStyle = '#444'; ctx.fillRect(-this.w/2 - 25, -15, 25, 30); ctx.fillRect(this.w/2, -15, 25, 30);      
+                ctx.fillStyle = '#333'; ctx.fillRect(-this.w/2 - 30, -20, 30, 40); ctx.fillRect(this.w/2, -20, 30, 40);      
                 
                 ctx.fillStyle = this.hp <= this.maxHp/2 ? '#FF0044' : '#FF5722';
                 ctx.globalAlpha = 0.8 + Math.random()*0.2;
-                ctx.beginPath(); ctx.moveTo(-this.w/2 - 20, 15); ctx.lineTo(-this.w/2 - 5, 15); ctx.lineTo(-this.w/2 - 12, 40 + Math.random()*30); ctx.fill();
-                ctx.beginPath(); ctx.moveTo(this.w/2 + 5, 15); ctx.lineTo(this.w/2 + 20, 15); ctx.lineTo(this.w/2 + 12, 40 + Math.random()*30); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(-this.w/2 - 25, 20); ctx.lineTo(-this.w/2 - 5, 20); ctx.lineTo(-this.w/2 - 15, 50 + Math.random()*40); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(this.w/2 + 5, 20); ctx.lineTo(this.w/2 + 25, 20); ctx.lineTo(this.w/2 + 15, 50 + Math.random()*40); ctx.fill();
                 ctx.globalAlpha = 1;
 
                 ctx.fillStyle = this.hp <= this.maxHp/2 ? '#fff' : '#FF0044'; 
-                ctx.shadowBlur=15; ctx.shadowColor=ctx.fillStyle;
-                ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+                ctx.shadowBlur=25; ctx.shadowColor=ctx.fillStyle;
+                ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
 
                 ctx.fillStyle = '#000';
-                let eyeOffset = (this.state === 'fighting') ? ((player.x - this.x < 0) ? -10 : 10) : 0;
-                ctx.beginPath(); ctx.arc(eyeOffset, 0, 12, 0, Math.PI*2); ctx.fill(); ctx.restore();
+                let eyeOffset = (this.state === 'fighting') ? ((player.x - this.x < 0) ? -12 : 12) : 0;
+                ctx.beginPath(); ctx.arc(eyeOffset, 0, 15, 0, Math.PI*2); ctx.fill(); ctx.restore();
             }
         }
 
         class Player {
-            constructor() { this.w = 30; this.h = 40; this.reset(); }
+            constructor() { this.w = 35; this.h = 45; this.reset(); } // Ukuran player dibesarkan sedikit
             reset() {
                 this.x = 100; this.y = height / 2 - 100; this.vx = 0; this.vy = 0;
-                this.speed = 500; this.jumpForce = -800; this.gravity = 2200; this.friction = 0.82; 
+                this.speed = 550; this.jumpForce = -850; this.gravity = 2400; this.friction = 0.80; 
                 this.isGrounded = false; this.jumpsLeft = 2; this.wallSliding = false; this.wallDirection = 0; 
-                this.isDashing = false; this.dashTime = 0; this.dashDuration = 0.15; this.dashSpeed = 1600; this.dashCooldown = 0; this.canDash = true;
+                this.isDashing = false; this.dashTime = 0; this.dashDuration = 0.18; this.dashSpeed = 1800; this.dashCooldown = 0; this.canDash = true;
                 
-                this.isSmashing = false; // Mechanic Ground Pound
+                this.isSmashing = false; 
 
                 this.coyoteTime = 0; this.jumpBuffer = 0;
                 this.hasMagnet = false; this.magnetTimer = 0; this.hasShield = false; 
@@ -813,41 +838,39 @@
                 if (dashJustPressed && this.canDash && this.dashCooldown <= 0 && !this.isSmashing) {
                     this.isDashing = true; this.dashTime = this.dashDuration; this.canDash = false; this.vy = 0; 
                     this.vx = keys.left ? -this.dashSpeed : this.dashSpeed; if (!keys.left && !keys.right) this.vx = this.dashSpeed; 
-                    playSound('dash'); createParticles(this.x+this.w/2, this.y+this.h/2, 20, '#fff', 5); camera.shake = 10;
+                    playSound('dash'); createParticles(this.x+this.w/2, this.y+this.h/2, 25, '#fff', 6); camera.shake = 12;
+                    shockwaves.push(new Shockwave(this.x+this.w/2, this.y+this.h/2, 'rgba(255,255,255,0.5)', 300));
                 }
 
                 // --- SMASH / GROUND POUND ---
                 if (keys.down && !this.isGrounded && !this.isDashing && !this.isSmashing) {
-                    this.isSmashing = true;
-                    this.vy = 2800; // Terjun sangat cepat
-                    this.vx = 0; // Kunci horizontal
-                    playSound('dash');
-                    createParticles(this.x+this.w/2, this.y, 10, '#fff', 4);
+                    this.isSmashing = true; this.vy = 3500; this.vx = 0; // Lebih ngebut
+                    playSound('dash'); createParticles(this.x+this.w/2, this.y, 15, '#fff', 5);
                 }
 
                 if (this.isDashing) {
                     this.dashTime -= dt;
-                    if (this.dashTime <= 0) { this.isDashing = false; this.dashCooldown = 0.3; this.vx *= 0.5; }
+                    if (this.dashTime <= 0) { this.isDashing = false; this.dashCooldown = 0.25; this.vx *= 0.4; }
                     this.trail.push({ x: this.x, y: this.y, life: 1.0 });
                 } else if (this.isSmashing) {
-                    this.vy += this.gravity * 2 * dt; // Extra gravity
-                    this.trail.push({ x: this.x, y: this.y, life: 0.8 }); // Trail banting
+                    this.vy += this.gravity * 3 * dt; 
+                    this.trail.push({ x: this.x, y: this.y, life: 0.8 }); 
                 } else {
                     let moveDir = 0; if (keys.right) moveDir += 1; if (keys.left) moveDir -= 1;
                     let currentSpeed = this.isInvincible ? this.speed * 1.5 : this.speed; 
 
-                    if (moveDir !== 0) this.vx += moveDir * currentSpeed * 10 * dt;
+                    if (moveDir !== 0) this.vx += moveDir * currentSpeed * 12 * dt;
                     else this.vx *= Math.pow(this.friction, dt * 60);
 
                     if (Math.abs(this.vx) > currentSpeed) this.vx = Math.sign(this.vx) * currentSpeed;
 
                     if (this.wallSliding && this.vy > 0) {
-                        this.vy = 120; if (Math.random() > 0.7) createParticles(this.wallDirection > 0 ? this.x+this.w : this.x, this.y+this.h, 1, '#ccc', 2);
+                        this.vy = 150; if (Math.random() > 0.6) createParticles(this.wallDirection > 0 ? this.x+this.w : this.x, this.y+this.h, 2, '#ccc', 3);
                     } else { this.vy += this.gravity * dt; }
-                    if (this.vy > 1500) this.vy = 1500; 
+                    if (this.vy > 1800) this.vy = 1800; 
                 }
 
-                for (let i = this.trail.length - 1; i >= 0; i--) { this.trail[i].life -= dt * 6; if (this.trail[i].life <= 0) this.trail.splice(i, 1); }
+                for (let i = this.trail.length - 1; i >= 0; i--) { this.trail[i].life -= dt * 5; if (this.trail[i].life <= 0) this.trail.splice(i, 1); }
 
                 let nextX = this.x + this.vx * dt; let nextY = this.y + this.vy * dt;
 
@@ -867,13 +890,12 @@
                     if (checkRectCollision(this, plat)) {
                         if (this.vy > 0) { 
                             if (this.isSmashing) {
-                                // Efek mendarat Ground Pound
-                                playSound('smash');
-                                camera.shake = 15;
-                                createParticles(this.x+this.w/2, this.y+this.h, 30, '#fff', 8);
+                                playSound('smash'); camera.shake = 25; screenFlash = 0.4; hitStopTimer = 0.05; // IMPACT!
+                                shockwaves.push(new Shockwave(this.x+this.w/2, this.y+this.h, '#fff', 600));
+                                createParticles(this.x+this.w/2, this.y+this.h, 40, '#fff', 12);
                                 this.isSmashing = false;
-                            } else if (this.vy > 1000) { 
-                                camera.shake = 6; createParticles(this.x+this.w/2, this.y+this.h, 15, '#ccc', 4); 
+                            } else if (this.vy > 1200) { 
+                                camera.shake = 8; createParticles(this.x+this.w/2, this.y+this.h, 20, '#ccc', 5); 
                             }
                             this.y = plat.y - this.h; this.isGrounded = true; this.jumpsLeft = 2; this.canDash = true; 
                         } else if (this.vy < 0) { this.y = plat.y + plat.h; }
@@ -885,11 +907,10 @@
                 if (!this.isDashing) {
                     for (let s of spikes) {
                         if (s.active && checkRectCollision(this, s)) {
-                            // Kalo Smash duri pakai Bintang = Hancur. Kalo enggak = Mati.
                             if (this.isInvincible) {
-                                s.active = false; playSound('hit'); createParticles(s.x+s.w/2, s.y+s.h/2, 20, '#FF0044', 5); mainScore += 100;
+                                s.active = false; playSound('hit'); createParticles(s.x+s.w/2, s.y+s.h/2, 30, '#FF0044', 7); mainScore += 100; camera.shake=8;
                             } else if (this.hasShield) {
-                                this.hasShield = false; s.active = false; this.vy = -700; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 20, '#4CAF50', 5);
+                                this.hasShield = false; s.active = false; this.vy = -900; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 30, '#4CAF50', 7); camera.shake=8; screenFlash = 0.3;
                             } else { gameOver("TERTUSUK DURI!"); }
                         }
                     }
@@ -897,7 +918,7 @@
                         if (l.active && checkRectCollision(this, l)) {
                             if (this.isInvincible) { /* Lewat saja */ }
                             else if (this.hasShield) {
-                                this.hasShield = false; l.active = false; this.vx = -800; this.vy = -400; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 20, '#4CAF50', 5);
+                                this.hasShield = false; l.active = false; this.vx = -1000; this.vy = -600; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 30, '#4CAF50', 7); camera.shake=8; screenFlash = 0.3;
                             } else { gameOver("TERBAKAR LASER!"); }
                         }
                     }
@@ -906,21 +927,21 @@
                 // --- JUMP ---
                 if (this.jumpBuffer > 0 && !this.isSmashing) {
                     if (this.wallSliding) {
-                        this.vy = this.jumpForce * 0.9; this.vx = this.wallDirection * -this.speed * 1.4; this.wallSliding = false; this.isDashing = false; this.jumpBuffer = 0;
-                        playSound('jump'); createParticles(this.wallDirection > 0 ? this.x+this.w : this.x, this.y+this.h/2, 10, '#ddd', 4);
+                        this.vy = this.jumpForce * 0.9; this.vx = this.wallDirection * -this.speed * 1.5; this.wallSliding = false; this.isDashing = false; this.jumpBuffer = 0;
+                        playSound('jump'); createParticles(this.wallDirection > 0 ? this.x+this.w : this.x, this.y+this.h/2, 15, '#ddd', 5);
                     } else if (this.coyoteTime > 0) {
                         this.vy = this.jumpForce; this.coyoteTime = 0; this.jumpBuffer = 0; this.jumpsLeft--;
-                        playSound('jump'); createParticles(this.x+this.w/2, this.y+this.h, 10, '#ddd', 3);
+                        playSound('jump'); createParticles(this.x+this.w/2, this.y+this.h, 15, '#ddd', 4);
                     } else if (this.jumpsLeft > 0 && !this.isGrounded) {
-                        this.vy = this.jumpForce * 0.85; this.jumpsLeft--; this.jumpBuffer = 0; this.isDashing = false; 
-                        playSound('jump'); createParticles(this.x+this.w/2, this.y+this.h, 15, this.isInvincible ? '#fff' : this.color, 4);
+                        this.vy = this.jumpForce * 0.9; this.jumpsLeft--; this.jumpBuffer = 0; this.isDashing = false; 
+                        playSound('jump'); createParticles(this.x+this.w/2, this.y+this.h, 20, this.isInvincible ? '#fff' : this.color, 6);
                     }
                 }
 
                 // --- JATUH ---
                 if (this.y > camera.y + height + 100) {
-                    if (this.isInvincible) { this.vy = -2000; playSound('jump'); } 
-                    else if (this.hasShield) { this.hasShield = false; this.vy = -1800; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 30, '#4CAF50', 6); } 
+                    if (this.isInvincible) { this.vy = -2500; playSound('smash'); camera.shake=15; shockwaves.push(new Shockwave(this.x+this.w/2, this.y+this.h, '#FFEB3B', 500)); } 
+                    else if (this.hasShield) { this.hasShield = false; this.vy = -2200; playSound('hit'); createParticles(this.x+this.w/2, this.y+this.h/2, 40, '#4CAF50', 8); camera.shake=15; } 
                     else { gameOver("TERJATUH KE JURANG!"); }
                 }
             }
@@ -928,37 +949,37 @@
             draw() {
                 ctx.save();
                 let displayColor = this.color;
-                if (this.isInvincible) displayColor = `hsl(${(globalTime*500)%360}, 100%, 50%)`; 
+                if (this.isInvincible) displayColor = `hsl(${(globalTime*1000)%360}, 100%, 60%)`; 
 
                 for (let t of this.trail) {
-                    ctx.fillStyle = displayColor; ctx.globalAlpha = t.life * 0.5;
-                    ctx.fillRect(t.x, t.y, this.w + (this.isDashing?25:0), this.h - (this.isDashing?20:0)); 
+                    ctx.fillStyle = displayColor; ctx.globalAlpha = t.life * 0.6;
+                    ctx.fillRect(t.x, t.y, this.w + (this.isDashing?30:0), this.h - (this.isDashing?20:0)); 
                 }
                 ctx.globalAlpha = 1;
 
                 let squashX = this.w, squashY = this.h;
-                if (this.isDashing) { squashX = this.w + 30; squashY = this.h - 20; } 
-                else if (this.isSmashing) { squashY = this.h + 15; squashX = this.w - 5; }
-                else if (!this.isGrounded) { let stretch = Math.min(Math.abs(this.vy)/100, 12); squashY = this.h + stretch; squashX = this.w - stretch/2; }
+                if (this.isDashing) { squashX = this.w + 35; squashY = this.h - 20; } 
+                else if (this.isSmashing) { squashY = this.h + 20; squashX = this.w - 8; }
+                else if (!this.isGrounded) { let stretch = Math.min(Math.abs(this.vy)/80, 15); squashY = this.h + stretch; squashX = this.w - stretch/2; }
 
                 let drawX = this.x + (this.w - squashX) / 2; let drawY = this.y + (this.h - squashY); 
 
-                if (this.isInvincible) { ctx.shadowBlur = 20; ctx.shadowColor = displayColor; }
+                if (this.isInvincible) { ctx.shadowBlur = 25; ctx.shadowColor = displayColor; }
                 if (this.hasShield) {
-                    ctx.beginPath(); ctx.arc(drawX+squashX/2, drawY+squashY/2, squashY/2+12, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='#4CAF50'; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(drawX+squashX/2, drawY+squashY/2, squashY/2+15, 0, Math.PI*2);
+                    ctx.fillStyle = 'rgba(76, 175, 80, 0.4)'; ctx.fill(); ctx.lineWidth=4; ctx.strokeStyle='#4CAF50'; ctx.stroke();
                 }
                 if (this.hasMagnet) {
-                    ctx.beginPath(); ctx.arc(drawX+squashX/2, drawY+squashY/2, squashY/2+25+Math.sin(globalTime*15)*5, 0, Math.PI*2);
-                    ctx.strokeStyle='rgba(0, 188, 212, 0.6)'; ctx.lineWidth=2; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(drawX+squashX/2, drawY+squashY/2, squashY/2+30+Math.sin(globalTime*20)*8, 0, Math.PI*2);
+                    ctx.strokeStyle='rgba(0, 188, 212, 0.8)'; ctx.lineWidth=3; ctx.stroke();
                 }
                 
                 ctx.fillStyle = displayColor; ctx.fillRect(drawX, drawY, squashX, squashY); ctx.shadowBlur = 0;
 
-                ctx.fillStyle = '#fff'; let eyeOffsetX = keys.left ? -6 : (keys.right ? 6 : 0);
-                if (this.isDashing) { ctx.fillRect(eyeOffsetX+drawX+8, drawY+10, 8, 3); ctx.fillRect(eyeOffsetX+drawX+18, drawY+10, 8, 3); } 
-                else if (this.isSmashing) { ctx.fillRect(eyeOffsetX+drawX+8, drawY+25, 5, 5); ctx.fillRect(eyeOffsetX+drawX+18, drawY+25, 5, 5); } // Mata turun pas Smash
-                else { ctx.fillRect(eyeOffsetX+drawX+8, drawY+10, 6, 6); ctx.fillRect(eyeOffsetX+drawX+18, drawY+10, 6, 6); }
+                ctx.fillStyle = '#fff'; let eyeOffsetX = keys.left ? -8 : (keys.right ? 8 : 0);
+                if (this.isDashing) { ctx.fillRect(eyeOffsetX+drawX+10, drawY+12, 10, 4); ctx.fillRect(eyeOffsetX+drawX+22, drawY+12, 10, 4); } 
+                else if (this.isSmashing) { ctx.fillRect(eyeOffsetX+drawX+10, drawY+28, 6, 6); ctx.fillRect(eyeOffsetX+drawX+22, drawY+28, 6, 6); } 
+                else { ctx.fillRect(eyeOffsetX+drawX+10, drawY+12, 7, 7); ctx.fillRect(eyeOffsetX+drawX+22, drawY+12, 7, 7); }
                 ctx.restore();
             }
         }
@@ -966,84 +987,80 @@
         class Platform {
             constructor(x, y, w, h, moveType = null) {
                 this.x = x; this.startY = y; this.startX = x; this.y = y; this.w = w; this.h = h;
-                this.moveType = moveType; // 'vertical', 'horizontal'
+                this.moveType = moveType; 
                 this.timeOffset = Math.random() * Math.PI * 2;
             }
             update(dt) {
-                if (this.moveType === 'vertical') this.y = this.startY + Math.sin(globalTime * 2 + this.timeOffset) * 120;
-                if (this.moveType === 'horizontal') this.x = this.startX + Math.sin(globalTime * 1.5 + this.timeOffset) * 150;
+                if (this.moveType === 'vertical') this.y = this.startY + Math.sin(globalTime * 2.5 + this.timeOffset) * 150;
+                if (this.moveType === 'horizontal') this.x = this.startX + Math.sin(globalTime * 2 + this.timeOffset) * 200;
             }
             draw() {
                 ctx.save(); ctx.fillStyle = '#263238'; ctx.fillRect(this.x, this.y, this.w, this.h);
-                ctx.fillStyle = '#4CAF50'; ctx.fillRect(this.x, this.y, this.w, 12);
-                if(this.moveType) { ctx.fillStyle = 'rgba(255,255,255,0.1)'; for(let i=0; i<this.w; i+=30) ctx.fillRect(this.x+i, this.y+12, 15, this.h); }
+                ctx.fillStyle = '#4CAF50'; ctx.fillRect(this.x, this.y, this.w, 15);
+                if(this.moveType) { ctx.fillStyle = 'rgba(255,255,255,0.15)'; for(let i=0; i<this.w; i+=30) ctx.fillRect(this.x+i, this.y+15, 15, this.h); }
                 ctx.restore();
             }
         }
 
         // --- MANAJEMEN GAME ---
         let player = new Player(); let gameBoss = new Boss();
-        let platforms = [], particles = [], coins = [], projectiles = [], powerups = [], spikes = [], energyOrbs = [], bouncers = [], lasers = [];
+        let platforms = [], particles = [], coins = [], projectiles = [], powerups = [], spikes = [], energyOrbs = [], bouncers = [], lasers = [], shockwaves = [];
         let levelEnd = 0, nextBossDistance = 2500;
 
         function createParticles(x, y, count, color, speed) {
-            for (let i = 0; i < count; i++) particles.push(new Particle(x, y, (Math.random()-0.5)*150*speed, (Math.random()-0.5)*150*speed, color, Math.random()*0.4+0.2));
+            for (let i = 0; i < count; i++) particles.push(new Particle(x, y, (Math.random()-0.5)*150*speed, (Math.random()-0.5)*150*speed, color, Math.random()*0.5+0.2));
         }
 
         function generateWorld() {
             if (platforms.length === 0) { platforms.push(new Platform(-100, height - 150, 1000, 500)); levelEnd = 900; }
 
             while (levelEnd < camera.x + width * 2.5) {
-                let gapX = Math.random() * 180 + 120; 
-                let platW = Math.random() * 300 + 150; 
+                let gapX = Math.random() * 200 + 150; 
+                let platW = Math.random() * 350 + 150; 
                 let type = Math.floor(Math.random() * 12); let platY; let minY = 200; 
 
                 if (type < 4) platY = height - 150 - Math.random() * 100;
-                else if (type < 7) platY = height - 250 - Math.random() * 150;
-                else if (type < 9) { platY = height - 400; platW = 90; platforms.push(new Platform(levelEnd+gapX-40, height-50, 180, 400)); } 
+                else if (type < 7) platY = height - 300 - Math.random() * 150;
+                else if (type < 9) { platY = height - 450; platW = 100; platforms.push(new Platform(levelEnd+gapX-50, height-50, 200, 400)); } 
                 else { platY = height - 200; } 
 
                 if (platY < minY) platY = minY;
 
                 let moveType = null;
                 if (levelEnd > 1500) {
-                    if (Math.random() < 0.15 && platW < 250) moveType = 'vertical';
-                    else if (Math.random() < 0.15 && platW < 250) moveType = 'horizontal';
+                    if (Math.random() < 0.2 && platW < 250) moveType = 'vertical';
+                    else if (Math.random() < 0.2 && platW < 250) moveType = 'horizontal';
                 }
                 
                 platforms.push(new Platform(levelEnd + gapX, platY, platW, 800, moveType)); 
                 
-                // KOIN 
                 if (Math.random() > 0.4) {
-                    let numCoins = Math.floor(Math.random() * 4) + 2; let step = platW / (numCoins + 1);
-                    for(let i = 1; i <= numCoins; i++) coins.push(new Coin(levelEnd+gapX+step*i-10, platY - 50 - Math.sin((i/(numCoins+1))*Math.PI)*50));
+                    let numCoins = Math.floor(Math.random() * 5) + 3; let step = platW / (numCoins + 1);
+                    for(let i = 1; i <= numCoins; i++) coins.push(new Coin(levelEnd+gapX+step*i-10, platY - 50 - Math.sin((i/(numCoins+1))*Math.PI)*60));
                 }
 
-                // POWERUPS 
-                if (Math.random() < 0.08 && platW > 100) {
-                    let r = Math.random(); let pType = r < 0.4 ? 'magnet' : (r < 0.8 ? 'shield' : 'star');
-                    powerups.push(new PowerUp(levelEnd+gapX+platW/2, platY - 80, pType));
+                if (Math.random() < 0.1 && platW > 100) {
+                    let r = Math.random(); let pType = r < 0.35 ? 'magnet' : (r < 0.7 ? 'shield' : 'star');
+                    powerups.push(new PowerUp(levelEnd+gapX+platW/2, platY - 90, pType));
                 }
 
-                // RINTANGAN 
-                if (Math.random() < 0.3 && platW > 250 && levelEnd > 1000 && !moveType) {
+                if (Math.random() < 0.35 && platW > 250 && levelEnd > 1000 && !moveType) {
                     let r = Math.random();
                     if (r < 0.5) spikes.push(new Spike(levelEnd+gapX+(platW/2)-45, platY-25, 90));
-                    else if (r < 0.8) lasers.push(new LaserGate(levelEnd+gapX+(platW/2), platY, Math.random()*100 + 150));
+                    else if (r < 0.8) lasers.push(new LaserGate(levelEnd+gapX+(platW/2), platY, Math.random()*150 + 150));
                     else bouncers.push(new Bouncer(levelEnd+gapX+(platW/2)-30, platY-15, 60));
                 }
 
-                // ORB ENERGI DI UDARA
-                if (Math.random() < 0.25) energyOrbs.push(new EnergyOrb(levelEnd+gapX/2, platY - 250 - Math.random()*150));
+                if (Math.random() < 0.3) energyOrbs.push(new EnergyOrb(levelEnd+gapX/2, platY - 300 - Math.random()*200));
 
                 levelEnd += gapX + platW;
             }
 
-            // Bersihkan memori
             platforms = platforms.filter(p => p.x+p.w > camera.x-width); coins = coins.filter(c => c.x > camera.x-width && !c.collected);
             projectiles = projectiles.filter(p => p.x > camera.x-width && p.active); powerups = powerups.filter(p => p.x > camera.x-width && !p.collected);
             spikes = spikes.filter(s => s.x+s.w > camera.x-width && s.active); energyOrbs = energyOrbs.filter(e => e.x > camera.x-width && !e.collected);
             bouncers = bouncers.filter(b => b.x+b.w > camera.x-width); lasers = lasers.filter(l => l.x > camera.x-width);
+            shockwaves = shockwaves.filter(s => s.life > 0);
         }
 
         function startGame() {
@@ -1051,11 +1068,12 @@
             if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume();
 
             player.reset(); gameBoss.reset();
-            platforms=[]; particles=[]; coins=[]; projectiles=[]; powerups=[]; spikes=[]; energyOrbs=[]; bouncers=[]; lasers=[];
+            platforms=[]; particles=[]; coins=[]; projectiles=[]; powerups=[]; spikes=[]; energyOrbs=[]; bouncers=[]; lasers=[]; shockwaves=[];
             
             gameState = 'PLAYING'; isPaused = false;
             currentDistance = 0; mainScore = 0; coinsCollected = 0; comboMultiplier = 1; comboTimer = 0;
-            camera.x = 0; camera.y = 0; levelEnd = 0; nextBossDistance = 2500;
+            camera.x = 0; camera.y = 0; camera.shake = 0; levelEnd = 0; nextBossDistance = 2500;
+            hitStopTimer = 0; screenFlash = 0;
             
             uiLayer.classList.add('hidden'); comboDisplay.style.opacity = '0';
             generateWorld(); lastTime = performance.now();
@@ -1071,10 +1089,11 @@
             saveData(); updateMenuStats();
 
             gameDesc.innerHTML = `Jarak: ${Math.floor(currentDistance)}m<br>Koin: ${coinsCollected}<br><b>SKOR AKHIR: <span style="font-size: 26px; color:#FFEB3B;">${finalScore}</span></b>`;
-            if (isNewHigh && finalScore > 0) gameDesc.innerHTML += `<br><span style="color:#00E676; font-size:22px; font-weight:900;">👑 REKOR BARU! 👑</span>`;
+            if (isNewHigh && finalScore > 0) gameDesc.innerHTML += `<br><span style="color:#00E676; font-size:24px; font-weight:900;">👑 REKOR BARU! 👑</span>`;
             startBtn.innerText = "COBA LAGI";
             
-            createParticles(player.x+player.w/2, player.y+player.h/2, 80, '#FF0044', 8); camera.shake = 30;
+            createParticles(player.x+player.w/2, player.y+player.h/2, 100, '#FF0044', 10); camera.shake = 50; screenFlash = 0.8;
+            shockwaves.push(new Shockwave(player.x+player.w/2, player.y+player.h/2, '#FF0044', 800));
         }
 
         // --- SISTEM CUACA ---
@@ -1083,21 +1102,21 @@
             if (Math.random() < 0.001) isRaining = !isRaining; 
             if (isRaining) {
                 rainIntensity = Math.min(1, rainIntensity + dt*0.5);
-                if (Math.random() < rainIntensity * 0.8) {
-                    for(let i=0; i<3; i++) rainParticles.push({ x: camera.x + Math.random()*width*1.5 - width*0.2, y: camera.y - 50, l: Math.random()*20+20, s: Math.random()*800+800 });
+                if (Math.random() < rainIntensity * 0.9) {
+                    for(let i=0; i<4; i++) rainParticles.push({ x: camera.x + Math.random()*width*1.5 - width*0.2, y: camera.y - 50, l: Math.random()*30+30, s: Math.random()*1000+1000 });
                 }
             } else { rainIntensity = Math.max(0, rainIntensity - dt*0.5); }
 
             for (let i = rainParticles.length-1; i >= 0; i--) {
-                let r = rainParticles[i]; r.y += r.s * dt; r.x -= 150 * dt; 
+                let r = rainParticles[i]; r.y += r.s * dt; r.x -= 200 * dt; 
                 if (r.y > camera.y + height) rainParticles.splice(i, 1);
             }
         }
 
-        const timeColors = [{r:255,g:220,b:200}, {r:100,g:180,b:240}, {r:255,g:120,b:50}, {r:15,g:15,b:35}];
+        const timeColors = [{r:255,g:220,b:200}, {r:100,g:180,b:240}, {r:255,g:120,b:50}, {r:10,g:10,b:25}];
         function getBackgroundColor() {
             if (typeof globalTime !== 'number' || isNaN(globalTime)) return 'rgb(100, 180, 240)';
-            let cycleTime = 80; let phase = cycleTime / 4; 
+            let cycleTime = 100; let phase = cycleTime / 4; 
             let t = Math.abs(globalTime) % cycleTime;
             let cIndex = Math.floor(t / phase) % 4; let nIndex = (cIndex + 1) % 4;
             let lerp = Math.max(0, Math.min(1, (t % phase) / phase));
@@ -1105,14 +1124,35 @@
             let c1 = timeColors[cIndex], c2 = timeColors[nIndex];
             let r = Math.floor(c1.r + (c2.r - c1.r)*lerp); let g = Math.floor(c1.g + (c2.g - c1.g)*lerp); let b = Math.floor(c1.b + (c2.b - c1.b)*lerp);
             
-            if (rainIntensity > 0) { r = Math.max(10, r - 50*rainIntensity); g = Math.max(10, g - 50*rainIntensity); b = Math.max(20, b - 40*rainIntensity); }
+            if (rainIntensity > 0) { r = Math.max(5, r - 60*rainIntensity); g = Math.max(5, g - 60*rainIntensity); b = Math.max(15, b - 50*rainIntensity); }
             return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // --- EFEK VISUAL: SPEED LINES ---
+        function drawSpeedLines() {
+            if (player.isDashing || player.vx > 1000) {
+                ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                for (let i=0; i<15; i++) ctx.fillRect(camera.x + Math.random()*width, camera.y + Math.random()*height, Math.random()*300+100, Math.random()*3+1);
+                ctx.restore();
+            }
+            if (player.isSmashing || player.vy > 1500) {
+                ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                for (let i=0; i<15; i++) ctx.fillRect(camera.x + Math.random()*width, camera.y + Math.random()*height, Math.random()*3+1, Math.random()*300+100);
+                ctx.restore();
+            }
         }
 
         // --- GAME LOOP UTAMA ---
         function update(dt) {
             if (dt > 0.1) dt = 0.1; if (isPaused) return; 
             globalTime += dt;
+
+            // FADE EFFECT DI LUAR HITSTOP
+            if (screenFlash > 0) screenFlash -= dt * 2.5;
+            if (camera.shake > 0) { camera.shake *= 0.85; if (camera.shake < 0.5) camera.shake = 0; }
+
+            // IMPACT FREEZE FRAME!
+            if (hitStopTimer > 0) { hitStopTimer -= dt; return; }
 
             if (gameState === 'PLAYING') {
                 player.update(dt); handleWeather(dt);
@@ -1127,11 +1167,11 @@
                     if (comboTimer <= 0) { comboMultiplier = 1; comboDisplay.style.opacity = '0'; } 
                     else {
                         comboDisplay.style.opacity = '1'; comboMultiplierText.innerText = comboMultiplier;
-                        comboDisplay.style.color = (comboTimer<0.5 && Math.floor(globalTime*15)%2===0) ? '#fff' : '#FFEB3B';
+                        comboDisplay.style.color = (comboTimer<0.5 && Math.floor(globalTime*20)%2===0) ? '#fff' : '#FFEB3B';
                     }
                 }
 
-                if (!gameBoss.active && currentDistance > nextBossDistance/10) { gameBoss.spawn(player.x, player.y); nextBossDistance += 3000; }
+                if (!gameBoss.active && currentDistance > nextBossDistance/10) { gameBoss.spawn(player.x, player.y); nextBossDistance += 3500; }
                 if (gameBoss.active) gameBoss.update(dt);
 
                 for(let plat of platforms) if(plat.update) plat.update(dt);
@@ -1141,6 +1181,7 @@
                 for(let p of powerups) p.update(dt);
                 for(let e of energyOrbs) e.update(dt);
                 for(let b of bouncers) b.update(dt);
+                for(let s of shockwaves) s.update(dt);
 
                 generateWorld();
 
@@ -1148,18 +1189,22 @@
                 if (targetCamX < camera.x) targetCamX = camera.x;
                 if (targetCamY > 150) targetCamY = 150; 
 
-                camera.x += (targetCamX - camera.x) * 6 * dt; camera.y += (targetCamY - camera.y) * 4 * dt;
+                // Dynamic Zoom Effect
+                let currentZoom = 1.0;
+                if (player.isDashing || player.isSmashing) currentZoom = 1.05;
+                if (hitStopTimer > 0) currentZoom = 1.1; // Extra zoom saat mukul
+
+                camera.x += (targetCamX - camera.x) * 6 * dt; camera.y += (targetCamY - camera.y) * 5 * dt;
             }
 
             for (let i = particles.length - 1; i >= 0; i--) { particles[i].update(dt); if (particles[i].life <= 0) particles.splice(i, 1); }
-            if (camera.shake > 0) { camera.shake *= 0.85; if (camera.shake < 0.5) camera.shake = 0; }
-            jumpJustPressed = false; dashJustPressed = false;
+            jumpJustPressed = false; dashJustPressed = false; keys.down = false; // Reset down trigger
         }
 
         function draw() {
             ctx.fillStyle = getBackgroundColor(); ctx.fillRect(0, 0, width, height);
             
-            let timeNorm = (globalTime % 80) / 80; 
+            let timeNorm = (globalTime % 100) / 100; 
             if (timeNorm > 0.6 && timeNorm < 0.95 && rainIntensity < 0.5) {
                 let starA = Math.sin((timeNorm - 0.6) * Math.PI / 0.35);
                 ctx.fillStyle = `rgba(255, 255, 255, ${starA})`;
@@ -1170,6 +1215,9 @@
             }
 
             ctx.save();
+            let zoom = 1.0 + (hitStopTimer > 0 ? 0.05 : 0) + ((player.isDashing || player.isSmashing) ? 0.02 : 0);
+            if (zoom > 1.0) { ctx.translate(width/2, height/2); ctx.scale(zoom, zoom); ctx.translate(-width/2, -height/2); }
+
             let sX = (Math.random()-0.5)*camera.shake, sY = (Math.random()-0.5)*camera.shake;
             ctx.translate(-camera.x + sX, -camera.y + sY);
 
@@ -1181,15 +1229,15 @@
 
             ctx.fillStyle = `rgba(255,255,255,${0.5 - rainIntensity*0.3})`; let cX = Math.floor(camera.x/600)*600;
             for(let x = cX-600; x < cX+width+600; x += 350) {
-                let pX = x + (camera.x * 0.45) % 350 + (globalTime*20); 
-                ctx.beginPath(); ctx.arc(pX, 120+(x%50), 40, 0, Math.PI*2); ctx.arc(pX+40, 100+(x%50), 50, 0, Math.PI*2); ctx.arc(pX+80, 120+(x%50), 35, 0, Math.PI*2); ctx.fill();
+                let pX = x + (camera.x * 0.45) % 350 + (globalTime*25); 
+                ctx.beginPath(); ctx.arc(pX, 120+(x%50), 45, 0, Math.PI*2); ctx.arc(pX+45, 100+(x%50), 60, 0, Math.PI*2); ctx.arc(pX+90, 120+(x%50), 40, 0, Math.PI*2); ctx.fill();
             }
 
-            ctx.fillStyle = `rgba(30, 40, 50, ${0.3 + rainIntensity*0.2})`; let fX = Math.floor(camera.x/200)*200;
+            ctx.fillStyle = `rgba(30, 40, 50, ${0.4 + rainIntensity*0.2})`; let fX = Math.floor(camera.x/200)*200;
             for(let x = fX-200; x < fX+width+200; x += 150) {
                 let pX = x + (camera.x * 0.7) % 150;
-                ctx.fillRect(pX, height-100+(x%80), 40, 500); 
-                if(x%2===0) { ctx.beginPath(); ctx.moveTo(pX-10, height-100+(x%80)); ctx.lineTo(pX+20, height-160+(x%80)); ctx.lineTo(pX+50, height-100+(x%80)); ctx.fill(); }
+                ctx.fillRect(pX, height-100+(x%80), 45, 500); 
+                if(x%2===0) { ctx.beginPath(); ctx.moveTo(pX-15, height-100+(x%80)); ctx.lineTo(pX+22, height-170+(x%80)); ctx.lineTo(pX+60, height-100+(x%80)); ctx.fill(); }
             }
 
             for (let plat of platforms) plat.draw();
@@ -1202,23 +1250,26 @@
             for (let e of energyOrbs) e.draw();
             if (gameBoss.active) gameBoss.draw();
             
-            if (gameState === 'PLAYING') player.draw();
+            if (gameState === 'PLAYING') { player.draw(); drawSpeedLines(); }
             for (let p of particles) p.draw();
+            for (let s of shockwaves) s.draw();
 
             if (rainParticles.length > 0) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
-                for (let r of rainParticles) { ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - 5, r.y + r.l); }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 1.5; ctx.beginPath();
+                for (let r of rainParticles) { ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - 8, r.y + r.l); }
                 ctx.stroke();
             }
             ctx.restore();
             
-            if (isRaining && Math.random() < 0.005) { ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fillRect(0,0,width,height); playSound('jump'); }
+            // FULL SCREEN FLASH (Tepat depan kamera)
+            if (screenFlash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${screenFlash})`; ctx.fillRect(0, 0, width, height); }
+            if (isRaining && Math.random() < 0.005) { ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(0,0,width,height); playSound('jump'); }
         }
 
         function gameLoop(timestamp) {
             let dt = (timestamp - lastTime) / 1000; lastTime = timestamp;
             update(dt); draw();
-            if (gameState === 'PLAYING' || particles.length > 0 || rainParticles.length > 0) animationFrameId = requestAnimationFrame(gameLoop);
+            if (gameState === 'PLAYING' || particles.length > 0 || rainParticles.length > 0 || shockwaves.length > 0) animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         // --- PAUSE LOGIC ---
